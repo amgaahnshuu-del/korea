@@ -1,0 +1,117 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  USER
+  EMPLOYER
+  ADMIN
+}
+
+enum JobType {
+  FULL_TIME
+  PART_TIME
+  CONTRACT
+  INTERNSHIP
+}
+
+enum JobStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum AppStatus {
+  PENDING
+  REVIEWED
+  INTERVIEWED
+  ACCEPTED
+  REJECTED
+}
+
+model User {
+  id           String        @id @default(cuid())
+  name         String
+  email        String        @unique
+  password     String
+  role         Role          @default(USER)
+  avatar       String?
+  phone        String?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  applications Application[]
+  company      Company?
+}
+
+model Company {
+  id          String   @id @default(cuid())
+  name        String
+  logo        String?
+  description String?
+  industry    String?
+  location    String?
+  size        String?
+  verified    Boolean  @default(false)
+  website     String?
+  createdAt   DateTime @default(now())
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  jobs        Job[]
+}
+
+model Job {
+  id           String        @id @default(cuid())
+  title        String
+  description  String
+  requirements String?
+  benefits     String?
+  salaryMin    Int?
+  salaryMax    Int?
+  location     String
+  type         JobType       @default(FULL_TIME)
+  category     String
+  status       JobStatus     @default(PENDING)
+  featured     Boolean       @default(false)
+  views        Int           @default(0)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  companyId    String
+  company      Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  applications Application[]
+
+  @@index([status])
+  @@index([companyId])
+  @@index([status, featured])
+  @@index([category])
+}
+
+model Application {
+  id        String    @id @default(cuid())
+  status    AppStatus @default(PENDING)
+  message   String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  jobId     String
+  job       Job       @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, jobId])
+  @@index([userId])
+  @@index([jobId])
+  @@index([status])
+}
+
+model Contact {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  subject   String
+  message   String
+  createdAt DateTime @default(now())
+}
