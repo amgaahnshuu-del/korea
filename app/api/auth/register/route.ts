@@ -5,7 +5,7 @@ import { signToken } from "@/lib/jwt";
 
 export async function POST(req: NextRequest) {
   try {
-    const { name, email, password, role } = await req.json();
+    const { name, email, password } = await req.json();
 
     if (!name || !email || !password) {
       return NextResponse.json({ error: "All fields required" }, { status: 400 });
@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
 
     const hashed = await bcrypt.hash(password, 10);
     const user = await prisma.user.create({
-      data: { name, email, password: hashed, role: role === "EMPLOYER" ? "EMPLOYER" : "USER" },
+      data: { name, email, password: hashed, role: "USER" },
     });
 
     const token = signToken({ id: user.id, email: user.email, role: user.role, name: user.name });

@@ -4,7 +4,7 @@ import { getUser } from "@/lib/auth";
 
 export async function GET() {
   const user = await getUser();
-  if (!user || (user.role !== "EMPLOYER" && user.role !== "ADMIN")) {
+  if (!user) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
@@ -14,7 +14,7 @@ export async function GET() {
   const applications = await prisma.application.findMany({
     where: { job: { companyId: company.id } },
     include: {
-      user: { select: { id: true, name: true, email: true, avatar: true, phone: true } },
+      user: { select: { id: true, name: true, email: true, avatar: true, phone: true, cvText: true } },
       job: { select: { id: true, title: true, location: true, type: true } },
     },
     orderBy: { createdAt: "desc" },

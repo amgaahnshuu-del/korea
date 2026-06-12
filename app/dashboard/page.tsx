@@ -1,202 +1,459 @@
 "use client";
-import { useState, useEffect } from "react";
+
+import { useState, useEffect, type ReactNode } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
+import {
+  FileText, Bookmark, Settings, LogOut,
+  Mail, Phone, Shield, Briefcase, ChevronRight,
+  KeyRound, Globe, CalendarDays,
+} from "lucide-react";
+import { pick, SUPPORTED_LOCALES } from "@/lib/i18n";
+import { useLanguage } from "@/components/LanguageProvider";
 
-const STATUS_COLORS: Record<string, string> = {
-  PENDING: "bg-yellow-100 text-yellow-700",
-  REVIEWED: "bg-blue-100 text-blue-700",
-  INTERVIEWED: "bg-purple-100 text-purple-700",
-  ACCEPTED: "bg-green-100 text-green-700",
-  REJECTED: "bg-red-100 text-red-700",
-};
-
-interface Application {
-  id: string;
-  status: string;
-  createdAt: string;
-  job: { id: string; title: string; location: string; type: string; salaryMin: number | null; salaryMax: number | null; company: { name: string; logo: string | null } };
-}
-
-interface User {
+interface Profile {
   id: string;
   name: string;
   email: string;
+  phone: string | null;
   role: string;
+  createdAt: string;
 }
+
+type Tab = "cv" | "mycv" | "saved" | "settings";
 
 export default function DashboardPage() {
   const router = useRouter();
-  const [user, setUser] = useState<User | null>(null);
-  const [applications, setApplications] = useState<Application[]>([]);
+  const { locale } = useLanguage();
+  const [tab, setTab] = useState<Tab>("cv");
+  const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const [cvForm, setCvForm] = useState({ name: "", phone: "" });
+  const [cvSaving, setCvSaving] = useState(false);
+  const [cvMsg, setCvMsg] = useState("");
+
+  const [pwForm, setPwForm] = useState({ current: "", next: "", confirm: "" });
+  const [pwSaving, setPwSaving] = useState(false);
+  const [pwMsg, setPwMsg] = useState("");
+  const [pwErr, setPwErr] = useState("");
+
+  const [cvText, setCvText] = useState("");
+  const [cvSavingText, setCvSavingText] = useState(false);
+  const [cvTextMsg, setCvTextMsg] = useState("");
+
   useEffect(() => {
-    Promise.all([
-      fetch("/api/auth/me").then((r) => r.json()),
-      fetch("/api/applications").then((r) => r.json()),
-    ]).then(([authData, appData]) => {
-      if (!authData.user) { router.push("/login"); return; }
-      setUser(authData.user);
-      setApplications(appData.applications || []);
-      setLoading(false);
-    });
+    fetch("/api/auth/profile")
+      .then((r) => r.json())
+      .then((data) => {
+        if (!data.user) { router.push("/login"); return; }
+        setProfile(data.user);
+        setCvForm({ name: data.user.name, phone: data.user.phone || "" });
+        setLoading(false);
+      });
+    fetch("/api/auth/cv")
+      .then((r) => r.json())
+      .then((data) => { if (data.cvText) setCvText(data.cvText); });
   }, [router]);
 
-  if (loading) return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="w-8 h-8 border-4 border-blue-700 border-t-transparent rounded-full animate-spin"></div>
-    </div>
-  );
-
-  const stats = {
-    total: applications.length,
-    active: applications.filter((a) => ["PENDING", "REVIEWED", "INTERVIEWED"].includes(a.status)).length,
-    accepted: applications.filter((a) => a.status === "ACCEPTED").length,
+  const saveCvText = async () => {
+    setCvSavingText(true);
+    setCvTextMsg("");
+    await fetch("/api/auth/cv", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ cvText }),
+    });
+    setCvSavingText(false);
+    setCvTextMsg(pick(locale, { mn: "Хадгалагдлаа", en: "Saved", ko: "저장됨" }));
+    setTimeout(() => setCvTextMsg(""), 3000);
   };
 
+  const saveCV = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setCvSaving(true);
+    setCvMsg("");
+    const res = await fetch("/api/auth/profile", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: cvForm.name, phone: cvForm.phone }),
+    });
+    const data = await res.json();
+    setCvSaving(false);
+    if (res.ok) {
+      setProfile((p) => p ? { ...p, name: data.user.name } : p);
+      setCvMsg(pick(locale, { mn: "Амжилттай хадгалагдлаа", en: "Saved successfully", ko: "저장되었습니다" }));
+      setTimeout(() => setCvMsg(""), 3000);
+    } else {
+      setCvMsg(data.error || pick(locale, { mn: "Алдаа гарлаа", en: "Error saving", ko: "저장 실패" }));
+    }
+  };
+
+  const changePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPwErr(""); setPwMsg("");
+    if (pwForm.next !== pwForm.confirm) {
+      setPwErr(pick(locale, { mn: "Нууц үг таарахгүй байна", en: "Passwords do not match", ko: "비밀번호가 일치하지 않습니다" }));
+      return;
+    }
+    if (pwForm.next.length < 6) {
+      setPwErr(pick(locale, { mn: "Нууц үг хамгийн багадаа 6 тэмдэгт байх ёстой", en: "Password must be at least 6 characters", ko: "비밀번호는 6자 이상이어야 합니다" }));
+      return;
+    }
+    setPwSaving(true);
+    const res = await fetch("/api/auth/profile", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ currentPassword: pwForm.current, newPassword: pwForm.next }),
+    });
+    const data = await res.json();
+    setPwSaving(false);
+    if (res.ok) {
+      setPwForm({ current: "", next: "", confirm: "" });
+      setPwMsg(pick(locale, { mn: "Нууц үг амжилттай солигдлоо", en: "Password changed successfully", ko: "비밀번호가 변경되었습니다" }));
+      setTimeout(() => setPwMsg(""), 3000);
+    } else {
+      setPwErr(data.error || pick(locale, { mn: "Алдаа гарлаа", en: "Error", ko: "오류" }));
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-700 border-t-transparent" />
+      </div>
+    );
+  }
+
+  const sidebarItems: { id: Tab; icon: ReactNode; label: string }[] = [
+    { id: "cv",       icon: <FileText size={16} />, label: pick(locale, { mn: "Миний профайл", en: "My Profile",   ko: "내 프로필" }) },
+    { id: "saved",    icon: <Bookmark size={16} />, label: pick(locale, { mn: "Хадгалсан зар", en: "Saved Jobs",   ko: "저장한 공고" }) },
+    { id: "settings", icon: <Settings size={16} />, label: pick(locale, { mn: "Тохиргоо",      en: "Settings",     ko: "설정" }) },
+  ];
+
+  const joinDate = profile?.createdAt
+    ? new Date(profile.createdAt).toLocaleDateString(
+        locale === "mn" ? "mn-MN" : locale === "ko" ? "ko-KR" : "en-US",
+        { year: "numeric", month: "long" }
+      )
+    : "";
+
   return (
-    <div className="flex flex-col min-h-screen bg-gray-50">
+    <div className="flex min-h-screen flex-col bg-gray-50">
       <Navbar />
 
-      <div className="max-w-7xl mx-auto w-full px-4 py-8 flex gap-6">
-        {/* Sidebar */}
-        <aside className="hidden md:block w-56 shrink-0">
-          <div className="bg-white rounded-2xl border border-gray-200 p-4 sticky top-24">
-            <div className="text-center mb-5">
-              <div className="w-14 h-14 bg-blue-600 text-white rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-2">
-                {user?.name.charAt(0).toUpperCase()}
+      <div className="mx-auto flex w-full max-w-7xl gap-6 px-4 py-8">
+        {/* ─── Sidebar ─── */}
+        <aside className="hidden w-64 shrink-0 md:block">
+          <div className="sticky top-24 overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
+            {/* Gradient banner */}
+            <div className="h-24 bg-gradient-to-br from-blue-600 to-blue-800" />
+
+            {/* Avatar overlapping banner */}
+            <div className="px-5 pb-5">
+              <div className="-mt-10 mb-3 flex justify-center">
+                <div className="flex h-20 w-20 items-center justify-center rounded-full border-4 border-white bg-blue-600 text-2xl font-bold text-white shadow-md">
+                  {profile?.name.charAt(0).toUpperCase()}
+                </div>
               </div>
-              <p className="font-semibold text-sm text-gray-900">{user?.name}</p>
-              <p className="text-xs text-gray-400">MongoJob</p>
-            </div>
-            <nav className="space-y-1">
-              {[
-                { icon: "🏠", label: "Dashboard", href: "/dashboard", active: true },
-                { icon: "📋", label: "Applications", href: "/dashboard#applications" },
-                { icon: "📄", label: "My Resume", href: "#" },
-                { icon: "💾", label: "Saved Jobs", href: "#" },
-                { icon: "⚙️", label: "Settings", href: "#" },
-              ].map((item) => (
-                <Link
-                  key={item.label}
-                  href={item.href}
-                  className={`flex items-center gap-2 px-3 py-2 rounded-xl text-sm ${item.active ? "bg-blue-50 text-blue-700 font-semibold" : "text-gray-600 hover:bg-gray-50"}`}
-                >
-                  <span>{item.icon}</span>
-                  {item.label}
-                </Link>
-              ))}
-            </nav>
-            <div className="mt-6 pt-4 border-t border-gray-100">
+
+              <div className="mb-4 text-center">
+                <p className="text-base font-bold text-gray-900">{profile?.name}</p>
+                <p className="mt-0.5 truncate text-xs text-gray-400">{profile?.email}</p>
+                <span className="mt-2 inline-flex items-center gap-1 rounded-full bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700">
+                  <Shield size={11} />
+                  {pick(locale, { mn: "Хэрэглэгч", en: "User", ko: "사용자" })}
+                </span>
+              </div>
+
+              {/* Member since */}
+              {joinDate && (
+                <div className="mb-4 flex items-center justify-center gap-1.5 text-xs text-gray-400">
+                  <CalendarDays size={12} />
+                  {pick(locale, { mn: `${joinDate}-аас`, en: `Joined ${joinDate}`, ko: `${joinDate} 가입` })}
+                </div>
+              )}
+
+              {/* My CV button */}
               <button
-                onClick={async () => {
-                  await fetch("/api/auth/logout", { method: "POST" });
-                  router.push("/");
-                  router.refresh();
-                }}
-                className="flex items-center gap-2 px-3 py-2 text-sm text-red-500 hover:bg-red-50 rounded-xl w-full"
+                onClick={() => setTab("mycv")}
+                className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-medium transition mb-1 ${
+                  tab === "mycv"
+                    ? "bg-blue-600 text-white shadow-sm"
+                    : "text-gray-600 hover:bg-gray-50"
+                }`}
               >
-                🚪 Logout
+                <FileText size={16} />
+                <span className="flex-1">{pick(locale, { mn: "Миний CV", en: "My CV", ko: "내 CV" })}</span>
+                {tab === "mycv" && <ChevronRight size={14} className="ml-auto opacity-70" />}
+                {cvText && tab !== "mycv" && <span className="h-2 w-2 rounded-full bg-green-500 shrink-0" />}
               </button>
+
+              {/* Nav */}
+              <nav className="space-y-1">
+                {sidebarItems.map((item) => (
+                  <button
+                    key={item.id}
+                    onClick={() => setTab(item.id)}
+                    className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-medium transition ${
+                      tab === item.id
+                        ? "bg-blue-600 text-white shadow-sm"
+                        : "text-gray-600 hover:bg-gray-50"
+                    }`}
+                  >
+                    {item.icon}
+                    {item.label}
+                    {tab === item.id && <ChevronRight size={14} className="ml-auto opacity-70" />}
+                  </button>
+                ))}
+              </nav>
+
+              {/* Logout */}
+              <div className="mt-4 border-t border-gray-100 pt-4">
+                <button
+                  onClick={async () => {
+                    await fetch("/api/auth/logout", { method: "POST" });
+                    router.push("/");
+                    router.refresh();
+                  }}
+                  className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-red-500 transition hover:bg-red-50"
+                >
+                  <LogOut size={16} />
+                  {pick(locale, { mn: "Гарах", en: "Log out", ko: "로그아웃" })}
+                </button>
+              </div>
             </div>
           </div>
         </aside>
 
-        {/* Main */}
-        <div className="flex-1">
-          <div className="flex items-center justify-between mb-6">
-            <h1 className="text-xl font-bold text-gray-900">Dashboard Overview</h1>
-            <Link href="/jobs" className="bg-blue-700 text-white text-sm font-semibold px-4 py-2 rounded-xl hover:bg-blue-800 transition">
-              + Find Jobs
-            </Link>
-          </div>
+        {/* ─── Main content ─── */}
+        <main className="flex-1 min-w-0">
 
-          {/* Stats */}
-          <div className="grid grid-cols-3 gap-4 mb-6">
-            <div className="bg-white rounded-2xl border border-gray-200 p-4 text-center">
-              <div className="text-2xl font-bold text-blue-700">{stats.total}</div>
-              <div className="text-xs text-gray-500 mt-1">Total Applications</div>
-              <div className="text-xs text-green-500 mt-1">↑ +{stats.total}</div>
-            </div>
-            <div className="bg-white rounded-2xl border border-gray-200 p-4 text-center">
-              <div className="text-2xl font-bold text-gray-900">{stats.active > 0 ? `1,${stats.active}84` : "1,284"}</div>
-              <div className="text-xs text-gray-500 mt-1">Jobs Viewed</div>
-            </div>
-            <div className="bg-white rounded-2xl border border-gray-200 p-4 text-center">
-              <div className="text-2xl font-bold text-gray-900">{stats.accepted || 15}</div>
-              <div className="text-xs text-gray-500 mt-1">Interviews</div>
-            </div>
-          </div>
-
-          {/* My Applications */}
-          <div id="applications" className="bg-white rounded-2xl border border-gray-200 p-5 mb-6">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="font-bold text-gray-900">My Job Applications</h2>
-              <Link href="/jobs" className="text-xs text-blue-600 hover:underline">View All →</Link>
-            </div>
-
-            {applications.length === 0 ? (
-              <div className="text-center py-10">
-                <div className="text-4xl mb-3">📋</div>
-                <p className="text-gray-400 text-sm">No applications yet</p>
-                <Link href="/jobs" className="mt-3 inline-block text-sm bg-blue-700 text-white px-4 py-2 rounded-xl">Browse Jobs</Link>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {applications.slice(0, 5).map((app) => (
-                  <div key={app.id} className="flex items-center gap-4 p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition">
-                    <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center text-blue-700 font-bold text-sm shrink-0">
-                      {app.job.company.name.charAt(0)}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <Link href={`/jobs/${app.job.id}`} className="font-semibold text-sm text-gray-900 hover:text-blue-700 truncate block">{app.job.title}</Link>
-                      <p className="text-xs text-gray-400">{app.job.company.name} · {app.job.location}</p>
-                    </div>
-                    <div className="text-right shrink-0">
-                      <span className={`text-xs px-2 py-1 rounded-full font-medium ${STATUS_COLORS[app.status]}`}>{app.status}</span>
-                      <p className="text-xs text-gray-400 mt-1">{new Date(app.createdAt).toLocaleDateString()}</p>
+          {/* ── Профайл ── */}
+          {tab === "cv" && (
+            <div className="space-y-4">
+              {/* Profile overview card */}
+              <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
+                <div className="h-16 bg-gradient-to-r from-blue-600 to-blue-800" />
+                <div className="flex flex-col gap-4 px-6 pb-6 sm:flex-row sm:items-end">
+                  <div className="-mt-8 flex h-16 w-16 shrink-0 items-center justify-center rounded-xl border-4 border-white bg-blue-600 text-xl font-bold text-white shadow">
+                    {profile?.name.charAt(0).toUpperCase()}
+                  </div>
+                  <div className="flex-1 pb-1">
+                    <h2 className="text-lg font-bold text-gray-900">{profile?.name}</h2>
+                    <div className="mt-1 flex flex-wrap gap-3 text-sm text-gray-500">
+                      <span className="flex items-center gap-1.5"><Mail size={13} className="text-gray-400" />{profile?.email}</span>
+                      {profile?.phone && (
+                        <span className="flex items-center gap-1.5"><Phone size={13} className="text-gray-400" />{profile.phone}</span>
+                      )}
                     </div>
                   </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Recommended Jobs & Career Growth */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="bg-white rounded-2xl border border-gray-200 p-5">
-              <h2 className="font-bold text-gray-900 mb-3">Recommended for You</h2>
-              <div className="space-y-3">
-                {[
-                  { title: "Full-stack Developer", company: "Brael in Navenga...", salary: "3,800만" },
-                  { title: "Data Scientist", company: "AI Solutions", salary: "4,200만" },
-                ].map((j) => (
-                  <Link key={j.title} href="/jobs" className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl hover:bg-blue-50 transition group">
-                    <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center text-blue-700 font-bold text-xs">
-                      {j.company.charAt(0)}
-                    </div>
-                    <div>
-                      <p className="text-sm font-semibold text-gray-800 group-hover:text-blue-700">{j.title}</p>
-                      <p className="text-xs text-gray-400">{j.company} · {j.salary}</p>
-                    </div>
+                  <Link
+                    href="/jobs"
+                    className="inline-flex items-center gap-1.5 rounded-xl bg-blue-700 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-800"
+                  >
+                    <Briefcase size={14} />
+                    {pick(locale, { mn: "Ажлын зар харах", en: "Browse Jobs", ko: "공고 보기" })}
                   </Link>
-                ))}
+                </div>
+              </div>
+
+              {/* Edit form */}
+              <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+                <h3 className="mb-5 text-sm font-bold uppercase tracking-wide text-gray-500">
+                  {pick(locale, { mn: "Мэдээлэл засах", en: "Edit Profile", ko: "프로필 수정" })}
+                </h3>
+                <form onSubmit={saveCV} className="space-y-4">
+                  <div>
+                    <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500">
+                      {pick(locale, { mn: "Бүтэн нэр", en: "Full Name", ko: "이름" })}
+                    </label>
+                    <input
+                      value={cvForm.name}
+                      onChange={(e) => setCvForm({ ...cvForm, name: e.target.value })}
+                      required
+                      className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm outline-none focus:border-blue-400"
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500">
+                      {pick(locale, { mn: "И-мэйл", en: "Email", ko: "이메일" })}
+                    </label>
+                    <input
+                      value={profile?.email || ""}
+                      disabled
+                      className="w-full rounded-xl border border-gray-100 bg-gray-50 px-4 py-2.5 text-sm text-gray-400 outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500">
+                      {pick(locale, { mn: "Утасны дугаар", en: "Phone", ko: "전화번호" })}
+                    </label>
+                    <input
+                      value={cvForm.phone}
+                      onChange={(e) => setCvForm({ ...cvForm, phone: e.target.value })}
+                      placeholder="+976 XXXX XXXX"
+                      className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm outline-none focus:border-blue-400"
+                    />
+                  </div>
+                  {cvMsg && <p className="text-sm text-green-600">{cvMsg}</p>}
+                  <button
+                    type="submit"
+                    disabled={cvSaving}
+                    className="w-full rounded-xl bg-blue-700 py-3 text-sm font-semibold text-white hover:bg-blue-800 disabled:opacity-60"
+                  >
+                    {cvSaving
+                      ? pick(locale, { mn: "Хадгалж байна...", en: "Saving...", ko: "저장 중..." })
+                      : pick(locale, { mn: "Хадгалах", en: "Save Changes", ko: "저장" })}
+                  </button>
+                </form>
               </div>
             </div>
+          )}
 
-            <div className="bg-blue-700 text-white rounded-2xl p-5">
-              <h2 className="font-bold mb-2">Career Growth</h2>
-              <h3 className="font-semibold text-lg mb-3">Optimize Your Profile</h3>
-              <p className="text-sm text-blue-100 mb-4">Complete your profile to get better job matches and increase your visibility to employers.</p>
-              <Link href="#" className="inline-block bg-white text-blue-700 font-semibold text-sm px-4 py-2 rounded-xl hover:bg-blue-50 transition">
-                Complete Profile
+          {/* ── Миний CV ── */}
+          {tab === "mycv" && (
+            <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+              <div className="mb-5 flex items-center gap-2">
+                <FileText size={16} className="text-blue-600" />
+                <h3 className="font-bold text-gray-900">
+                  {pick(locale, { mn: "Миний CV", en: "My CV", ko: "내 CV" })}
+                </h3>
+              </div>
+              <p className="mb-4 text-sm text-gray-400">
+                {pick(locale, {
+                  mn: "CV-гаа доор бичнэ үү. Ажил олгогч таны CV-г харах боломжтой.",
+                  en: "Write your CV below. Employers will be able to view it.",
+                  ko: "아래에 CV를 작성하세요. 고용주가 확인할 수 있습니다.",
+                })}
+              </p>
+              <textarea
+                value={cvText}
+                onChange={(e) => setCvText(e.target.value)}
+                rows={18}
+                placeholder={pick(locale, {
+                  mn: "Нэр:\nТүүх:\nАжлын туршлага:\nБоловсрол:\nУр чадвар:\n...",
+                  en: "Name:\nSummary:\nWork Experience:\nEducation:\nSkills:\n...",
+                  ko: "이름:\n요약:\n경력:\n학력:\n기술:\n...",
+                })}
+                className="w-full resize-y rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm leading-relaxed outline-none transition focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100"
+              />
+              <div className="mt-4 flex items-center gap-3">
+                <button
+                  onClick={saveCvText}
+                  disabled={cvSavingText}
+                  className="rounded-xl bg-blue-700 px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-800 disabled:opacity-60"
+                >
+                  {cvSavingText
+                    ? pick(locale, { mn: "Хадгалж байна...", en: "Saving...", ko: "저장 중..." })
+                    : pick(locale, { mn: "Хадгалах", en: "Save", ko: "저장" })}
+                </button>
+                {cvTextMsg && <span className="text-sm text-green-600">{cvTextMsg}</span>}
+              </div>
+            </div>
+          )}
+
+          {/* ── Хадгалсан зар ── */}
+          {tab === "saved" && (
+            <div className="rounded-2xl border border-gray-200 bg-white p-16 text-center shadow-sm">
+              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-blue-50">
+                <Bookmark className="h-8 w-8 text-blue-400" />
+              </div>
+              <h3 className="mb-2 font-bold text-gray-900">
+                {pick(locale, { mn: "Хадгалсан зар байхгүй", en: "No saved jobs yet", ko: "저장한 공고가 없습니다" })}
+              </h3>
+              <p className="mb-6 text-sm text-gray-400">
+                {pick(locale, {
+                  mn: "Таалагдсан зарыг хадгалснаар дараа харах боломжтой.",
+                  en: "Save jobs you like to review them later.",
+                  ko: "마음에 드는 공고를 저장하면 나중에 확인할 수 있습니다.",
+                })}
+              </p>
+              <Link
+                href="/jobs"
+                className="inline-flex items-center gap-2 rounded-xl bg-blue-700 px-6 py-2.5 text-sm font-semibold text-white hover:bg-blue-800"
+              >
+                <Briefcase size={14} />
+                {pick(locale, { mn: "Ажлын зар харах", en: "Browse Jobs", ko: "공고 보기" })}
               </Link>
             </div>
-          </div>
-        </div>
+          )}
+
+          {/* ── Тохиргоо ── */}
+          {tab === "settings" && (
+            <div className="space-y-4">
+              {/* Language card */}
+              <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+                <div className="mb-4 flex items-center gap-2">
+                  <Globe size={16} className="text-blue-600" />
+                  <h3 className="font-bold text-gray-900">
+                    {pick(locale, { mn: "Хэл", en: "Language", ko: "언어" })}
+                  </h3>
+                </div>
+                <div className="flex items-center gap-4">
+                  <LanguageSwitcher />
+                  <span className="text-sm text-gray-500">
+                    {SUPPORTED_LOCALES.find((l) => l.code === locale)?.label}
+                  </span>
+                </div>
+              </div>
+
+              {/* Password card */}
+              <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+                <div className="mb-5 flex items-center gap-2">
+                  <KeyRound size={16} className="text-blue-600" />
+                  <h3 className="font-bold text-gray-900">
+                    {pick(locale, { mn: "Нууц үг солих", en: "Change Password", ko: "비밀번호 변경" })}
+                  </h3>
+                </div>
+                <form onSubmit={changePassword} className="space-y-4">
+                  {[
+                    {
+                      label: pick(locale, { mn: "Одоогийн нууц үг", en: "Current Password", ko: "현재 비밀번호" }),
+                      key: "current" as const,
+                    },
+                    {
+                      label: pick(locale, { mn: "Шинэ нууц үг", en: "New Password", ko: "새 비밀번호" }),
+                      key: "next" as const,
+                    },
+                    {
+                      label: pick(locale, { mn: "Нууц үг давтах", en: "Confirm New Password", ko: "새 비밀번호 확인" }),
+                      key: "confirm" as const,
+                    },
+                  ].map(({ label, key }) => (
+                    <div key={key}>
+                      <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500">
+                        {label}
+                      </label>
+                      <input
+                        type="password"
+                        value={pwForm[key]}
+                        onChange={(e) => setPwForm({ ...pwForm, [key]: e.target.value })}
+                        required
+                        minLength={key !== "current" ? 6 : undefined}
+                        className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm outline-none focus:border-blue-400"
+                      />
+                    </div>
+                  ))}
+                  {pwErr && <p className="text-sm text-red-600">{pwErr}</p>}
+                  {pwMsg && <p className="text-sm text-green-600">{pwMsg}</p>}
+                  <button
+                    type="submit"
+                    disabled={pwSaving}
+                    className="w-full rounded-xl bg-blue-700 py-3 text-sm font-semibold text-white hover:bg-blue-800 disabled:opacity-60"
+                  >
+                    {pwSaving
+                      ? pick(locale, { mn: "Солж байна...", en: "Updating...", ko: "변경 중..." })
+                      : pick(locale, { mn: "Нууц үг солих", en: "Change Password", ko: "비밀번호 변경" })}
+                  </button>
+                </form>
+              </div>
+            </div>
+          )}
+        </main>
       </div>
 
       <Footer />

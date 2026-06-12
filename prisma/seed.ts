@@ -25,22 +25,22 @@ async function main() {
   const employer1 = await prisma.user.upsert({
     where: { email: "samsung@recruit.com" },
     update: {},
-    create: { name: "Samsung HR", email: "samsung@recruit.com", password: employerPw, role: "EMPLOYER" },
+    create: { name: "Samsung HR", email: "samsung@recruit.com", password: employerPw, role: "USER" },
   });
   const employer2 = await prisma.user.upsert({
     where: { email: "hyundai@recruit.com" },
     update: {},
-    create: { name: "Hyundai HR", email: "hyundai@recruit.com", password: employerPw, role: "EMPLOYER" },
+    create: { name: "Hyundai HR", email: "hyundai@recruit.com", password: employerPw, role: "USER" },
   });
   const employer3 = await prisma.user.upsert({
     where: { email: "lotte@recruit.com" },
     update: {},
-    create: { name: "Lotte HR", email: "lotte@recruit.com", password: employerPw, role: "EMPLOYER" },
+    create: { name: "Lotte HR", email: "lotte@recruit.com", password: employerPw, role: "USER" },
   });
   const employer4 = await prisma.user.upsert({
     where: { email: "coupang@recruit.com" },
     update: {},
-    create: { name: "Coupang HR", email: "coupang@recruit.com", password: employerPw, role: "EMPLOYER" },
+    create: { name: "Coupang HR", email: "coupang@recruit.com", password: employerPw, role: "USER" },
   });
 
   // Create regular users
@@ -249,8 +249,8 @@ async function main() {
 
   console.log("✅ Seeding complete!");
   console.log("Admin:     admin@ajilkorea.com / admin123");
-  console.log("Employer:  samsung@recruit.com / employer123");
-  console.log("Job seeker: bataa@gmail.com / user123");
+  console.log("User:      samsung@recruit.com / employer123");
+  console.log("User:      bataa@gmail.com / user123");
 }
 
 main().catch(console.error).finally(() => prisma.$disconnect());

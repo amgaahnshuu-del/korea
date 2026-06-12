@@ -9,7 +9,6 @@ datasource db {
 
 enum Role {
   USER
-  EMPLOYER
   ADMIN
 }
 
@@ -42,6 +41,7 @@ model User {
   role         Role          @default(USER)
   avatar       String?
   phone        String?
+  cvText       String?
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
   applications Application[]
@@ -75,6 +75,7 @@ model Job {
   location     String
   type         JobType       @default(FULL_TIME)
   category     String
+  contactPhone String?
   status       JobStatus     @default(PENDING)
   featured     Boolean       @default(false)
   views        Int           @default(0)

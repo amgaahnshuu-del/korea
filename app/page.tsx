@@ -1,53 +1,37 @@
 import Link from "next/link";
-import {
-  Factory,
-  Laptop,
-  Utensils,
-  Building2,
-  Truck,
-  Cross,
-  Volume2,
-} from "lucide-react";
+import { redirect } from "next/navigation";
+import { Building2, Briefcase, Cross, Factory, Laptop, Truck, Utensils, Volume2 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { getUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { JOB_TYPE_LABELS, JOB_TYPE_COLORS, formatSalary, timeAgo } from "@/lib/constants";
+import {
+  formatRelativeTime,
+  formatSalary,
+  getCategoryLabel,
+  getJobTypeLabel,
+  getTranslation,
+  pick,
+} from "@/lib/i18n";
+import { getLocale } from "@/lib/i18n-server";
 
-const CATEGORIES = [
-  {
-    name: "Manufacturing",
-    icon: Factory,
-    color: "bg-stone-100 text-stone-600",
-  },
-  {
-    name: "IT & Tech",
-    icon: Laptop,
-    color: "bg-stone-100 text-stone-600",
-  },
-  {
-    name: "Food & Beverage",
-    icon: Utensils,
-    color: "bg-stone-100 text-stone-600",
-  },
-  {
-    name: "Construction",
-    icon: Building2,
-    color: "bg-stone-100 text-stone-600",
-  },
-  {
-    name: "Logistics",
-    icon: Truck,
-    color: "bg-stone-100 text-stone-600",
-  },
-  {
-    name: "Healthcare",
-    icon: Cross,
-    color: "bg-stone-100 text-stone-600",
-  },
+const CATEGORY_CARDS = [
+  { key: "Manufacturing", icon: Factory, color: "bg-stone-100 text-stone-600" },
+  { key: "IT & Tech", icon: Laptop, color: "bg-stone-100 text-stone-600" },
+  { key: "Food & Beverage", icon: Utensils, color: "bg-stone-100 text-stone-600" },
+  { key: "Construction", icon: Building2, color: "bg-stone-100 text-stone-600" },
+  { key: "Logistics", icon: Truck, color: "bg-stone-100 text-stone-600" },
+  { key: "Healthcare", icon: Cross, color: "bg-stone-100 text-stone-600" },
 ];
 
-
 export default async function Home() {
+  const locale = await getLocale();
+  const t = getTranslation(locale, "home");
+  const common = getTranslation(locale, "common");
+
+  const user = await getUser();
+  if (user) redirect("/jobs");
+
   const [featuredJobs, totalJobs, verifiedCompanies] = await Promise.all([
     prisma.job.findMany({
       where: { status: "APPROVED", featured: true },
@@ -63,158 +47,114 @@ export default async function Home() {
     prisma.company.count({ where: { verified: true } }),
   ]);
 
+  const popularCategories = CATEGORY_CARDS.slice(0, 4);
+
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex min-h-screen flex-col">
       <Navbar />
 
-      {/* Hero */}
-      <section className="bg-white text-black py-20 px-4">
-        <div className="max-w-4xl mx-auto mt-10 text-center">
-          <div className="inline-flex items-center gap-2 bg-neutral-100 rounded-full px-4 py-1 text-sm mb-6">
-            <Volume2 className="w-4 h-4 text-black" />
-            БНСУ-д ажил хайх хамгийн найдвартай систем
+      <section className="bg-white px-4 py-20 text-black">
+        <div className="mx-auto mt-10 max-w-4xl text-center">
+          <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-neutral-100 px-4 py-1 text-sm">
+            <Volume2 className="h-4 w-4 text-black" />
+            {t.heroBadge}
           </div>
-          <h1 className="text-4xl text-black md:text-5xl font-extrabold mb-4 leading-tight">
-            БНСУ-д ажил хайх хамгийн <br />
-            <span className="text-blue-700">найдвартай </span> систем.
+          <h1 className="mb-4 text-4xl font-extrabold leading-tight text-black md:text-5xl">
+            {t.heroHeading}
           </h1>
-          <p className="text-black text-lg mb-10 max-w-xl mx-auto">
-            Discover thousands of career opportunities in South Korea tailored
-            for the Mongolian community.
-          </p>
+          <p className="mx-auto mb-10 max-w-xl text-lg text-black">{t.heroDescription}</p>
 
-          <div className="bg-white rounded-xl border border-gray-200 shadow-xl p-2 flex flex-col sm:flex-row gap-2 max-w-2xl mx-auto">
-            <div className="flex items-center gap-2 flex-1 px-4">
-              <svg
-                className="w-5 h-5 text-gray-400 shrink-0"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                />
+          <div className="mx-auto flex max-w-2xl flex-col gap-2 rounded-xl border border-gray-200 bg-white p-2 shadow-xl sm:flex-row">
+            <div className="flex flex-1 items-center gap-2 px-4">
+              <svg className="h-5 w-5 shrink-0 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
               <input
                 type="text"
-                placeholder="Job title, keywords, or company"
-                className="flex-1 text-gray-800 outline-none py-2 text-sm"
+                placeholder={t.searchJobPlaceholder}
+                className="flex-1 py-2 text-sm text-gray-800 outline-none"
               />
             </div>
-            <div className="hidden sm:flex items-center gap-2 px-4 border-l border-black">
-              <svg
-                className="w-5 h-5 text-gray-400 shrink-0"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                />
+            <div className="hidden items-center gap-2 border-l border-black px-4 sm:flex">
+              <svg className="h-5 w-5 shrink-0 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
               </svg>
               <input
                 type="text"
-                placeholder="Seoul, Busan, Incheon..."
-                className="w-36 text-gray-800 outline-none py-2 text-sm"
+                placeholder={t.searchLocationPlaceholder}
+                className="w-36 py-2 text-sm text-gray-800 outline-none"
               />
             </div>
             <Link
               href="/jobs"
-              className="bg-blue-700 text-white px-6 py-3 rounded-xl font-semibold text-sm hover:bg-blue-800 transition whitespace-nowrap text-center"
+              className="whitespace-nowrap rounded-xl bg-blue-700 px-6 py-3 text-center text-sm font-semibold text-white transition hover:bg-blue-800"
             >
-              Search Jobs
+              {common.searchJobs}
             </Link>
           </div>
 
-          <div className="flex flex-wrap justify-center gap-5 mt-10 text-sm text-black">
-            <span>Popular:</span>
-            {[
-              "Manufacturing",
-              "IT & Software",
-              "Hospitality",
-              "Construction",
-            ].map((t) => (
+          <div className="mt-10 flex flex-wrap justify-center gap-5 text-sm text-black">
+            <span>{t.popularPrefix}</span>
+            {popularCategories.map((cat) => (
               <Link
-                key={t}
-                href={`/jobs?category=${t}`}
-                className="hover:text-white text-blue-700 underline underline-offset-2"
+                key={cat.key}
+                href={`/jobs?category=${cat.key}`}
+                className="text-blue-700 underline underline-offset-2 hover:text-white"
               >
-                {t}
+                {getCategoryLabel(locale, cat.key)}
               </Link>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Stats */}
-      <section className="bg-stone-100 mt-10 border-b border-gray-100 py-8">
-        <div className="max-w-5xl mx-auto px-4 grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+      <section className="mt-10 border-b border-gray-100 bg-stone-100 py-8">
+        <div className="mx-auto grid max-w-5xl grid-cols-2 gap-6 px-4 text-center md:grid-cols-4">
           {[
             {
               value: totalJobs > 0 ? `${totalJobs.toLocaleString()}+` : "12k+",
-              label: "Active Jobs",
+              label: t.stats.activeJobs,
             },
             {
               value: verifiedCompanies > 0 ? `${verifiedCompanies}+` : "850+",
-              label: "Verified Companies",
+              label: t.stats.verifiedCompanies,
             },
-            { value: "45k", label: "Successful Placements" },
-            { value: "24/7", label: "Visa Support" },
+            { value: "45k", label: t.stats.successfulPlacements },
+            { value: "24/7", label: t.stats.visaSupport },
           ].map((s) => (
             <div key={s.label}>
-              <div className="text-3xl font-extrabold text-blue-800">
-                {s.value}
-              </div>
-              <div className="text-sm text-gray-500 mt-1">{s.label}</div>
+              <div className="text-3xl font-extrabold text-blue-800">{s.value}</div>
+              <div className="mt-1 text-sm text-gray-500">{s.label}</div>
             </div>
           ))}
         </div>
       </section>
 
-      {/* Browse by Category */}
-      <section className="py-16 px-2 bg-gray-50">
-        <div className="max-w-6xl mx-auto">
-          <div className="flex items-center justify-between mb-8">
+      <section className="bg-gray-50 px-2 py-16">
+        <div className="mx-auto max-w-6xl">
+          <div className="mb-8 flex items-center justify-between">
             <div>
-              <h2 className="text-2xl font-bold text-gray-900">
-                Browse by Category
-              </h2>
-              <p className="text-gray-500 text-sm mt-1">
-                Explore roles across all major industries in Korea.
-              </p>
+              <h2 className="text-2xl font-bold text-gray-900">{t.browse.title}</h2>
+              <p className="mt-1 text-sm text-gray-500">{t.browse.description}</p>
             </div>
-            <Link
-              href="/jobs"
-              className="text-blue-600 text-sm font-semibold hover:underline"
-            >
-              View All Categories →
+            <Link href="/jobs" className="text-sm font-semibold text-blue-600 hover:underline">
+              {t.browse.viewAll}
             </Link>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-10">
-            {CATEGORIES.map((cat) => {
+          <div className="grid grid-cols-2 gap-10 sm:grid-cols-3 md:grid-cols-6">
+            {CATEGORY_CARDS.map((cat) => {
               const Icon = cat.icon;
 
               return (
                 <Link
-                  key={cat.name}
-                  href={`/jobs?category=${cat.name}`}
-                  className="rounded-2xl p-5 text-center hover:shadow-md transition cursor-pointer bg-white border border-black/10"
+                  key={cat.key}
+                  href={`/jobs?category=${cat.key}`}
+                  className="cursor-pointer rounded-2xl border border-black/10 bg-white p-5 text-center transition hover:shadow-md"
                 >
-                  <div
-                    className={`w-12 h-12 mx-auto mb-3 rounded-full flex items-center justify-center ${cat.color}`}
-                  >
+                  <div className={`mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full ${cat.color}`}>
                     <Icon size={22} />
                   </div>
-
-                  <div className="text-sm font-semibold text-gray-800">
-                    {cat.name}
-                  </div>
+                  <div className="text-sm font-semibold text-gray-800">{getCategoryLabel(locale, cat.key)}</div>
                 </Link>
               );
             })}
@@ -222,77 +162,59 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* Featured Jobs */}
-      <section className="py-16 px-4">
-        <div className="max-w-6xl mx-auto">
-          <div className="flex items-center justify-between mb-8">
+      <section className="px-4 py-16">
+        <div className="mx-auto max-w-6xl">
+          <div className="mb-8 flex items-center justify-between">
             <div>
-              <h2 className="text-2xl font-bold text-gray-900">
-                Featured Opportunities
-              </h2>
-              <p className="text-gray-500 text-sm mt-1">
-                Top companies hiring this week for international talent.
-              </p>
+              <h2 className="text-2xl font-bold text-gray-900">{t.featured.title}</h2>
+              <p className="mt-1 text-sm text-gray-500">{t.featured.description}</p>
             </div>
           </div>
 
           {featuredJobs.length === 0 ? (
-            <div className="text-center py-16 text-gray-400">
-              <div className="text-5xl mb-4">💼</div>
-              <p className="text-lg font-medium">No featured jobs yet</p>
-              <p className="text-sm mt-2">
-                Be the first to post a job or check back soon!
-              </p>
-              <Link
-                href="/jobs"
-                className="mt-6 inline-block bg-blue-700 text-white px-6 py-2 rounded-xl"
-              >
-                Browse All Jobs
+            <div className="py-16 text-center text-gray-400">
+              <Briefcase className="mx-auto mb-4 h-12 w-12 text-gray-300" />
+              <p className="text-lg font-medium">{t.featured.emptyTitle}</p>
+              <p className="mt-2 text-sm">{t.featured.emptyText}</p>
+              <Link href="/jobs" className="mt-6 inline-block rounded-xl bg-blue-700 px-6 py-2 text-white">
+                {t.featured.browseAll}
               </Link>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {featuredJobs.map((job) => (
                 <Link
                   key={job.id}
                   href={`/jobs/${job.id}`}
-                  className="bg-white border border-gray-200 rounded-2xl p-5 hover:shadow-lg transition group"
+                  className="group rounded-2xl border border-gray-200 bg-white p-5 transition hover:shadow-lg"
                 >
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="w-10 h-10 bg-blue-100 rounded-xl overflow-hidden flex items-center justify-center text-blue-700 font-bold text-sm">
+                  <div className="mb-3 flex items-start justify-between">
+                    <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl bg-blue-100 text-sm font-bold text-blue-700">
                       {job.company.logo ? (
-                        <img
-                          src={job.company.logo}
-                          alt={job.company.name}
-                          className="w-full h-full object-cover"
-                        />
+                        <img src={job.company.logo} alt={job.company.name} className="h-full w-full object-cover" />
                       ) : (
                         job.company.name.charAt(0)
                       )}
                     </div>
-                    <span
-                      className={`text-xs px-2 py-1 rounded-full font-medium ${JOB_TYPE_COLORS[job.type]}`}
-                    >
-                      {JOB_TYPE_LABELS[job.type]}
+                    <span className="rounded-full px-2 py-1 text-xs font-medium text-white bg-blue-700/90">
+                      {getJobTypeLabel(locale, job.type)}
                     </span>
                   </div>
-                  <h3 className="font-semibold text-gray-900 text-sm mb-1 group-hover:text-blue-700 transition line-clamp-2">
+                  <h3 className="mb-1 line-clamp-2 text-sm font-semibold text-gray-900 transition group-hover:text-blue-700">
                     {job.title}
                   </h3>
-                  <p className="text-xs text-gray-500 mb-3">
+                  <p className="mb-3 text-xs text-gray-500">
                     {job.company.name} · {job.location}
                   </p>
-                  {formatSalary(job.salaryMin, job.salaryMax) && (
-                    <p className="text-xs text-blue-600 font-semibold mb-3">
-                      {formatSalary(job.salaryMin, job.salaryMax)}
+                  {formatSalary(locale, job.salaryMin, job.salaryMax) && (
+                    <p className="mb-3 text-xs font-semibold text-blue-600">
+                      {formatSalary(locale, job.salaryMin, job.salaryMax)}
                     </p>
                   )}
                   <div className="flex items-center justify-between">
-                    <span className="text-xs text-gray-400">
-                      {timeAgo(job.createdAt)}
-                    </span>
-                    <span className="text-xs font-semibold text-blue-600 bg-blue-50 px-3 py-1 rounded-full">
-                      Apply Now
+                    <span className="text-xs text-gray-400">{formatRelativeTime(locale, job.createdAt)}</span>
+                    <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-600">
+                      {common.applyNow}
                     </span>
                   </div>
                 </Link>
@@ -300,81 +222,74 @@ export default async function Home() {
             </div>
           )}
 
-          <div className="text-center mt-10">
+          <div className="mt-10 text-center">
             <Link
               href="/jobs"
-              className="border border-blue-700 text-blue-700 px-8 py-3 rounded-xl font-semibold hover:bg-blue-50 transition"
+              className="rounded-xl border border-blue-700 px-8 py-3 font-semibold text-blue-700 transition hover:bg-blue-50"
             >
-              Browse All Jobs →
+              {t.featured.browseAll}
             </Link>
           </div>
         </div>
       </section>
 
-      {/* Employer CTA */}
-      <section className="py-16 px-4 bg-gray-50">
-        <div className="max-w-6xl mx-auto overflow-hidden rounded-3xl">
+      <section className="bg-gray-50 px-4 py-16">
+        <div className="mx-auto max-w-6xl overflow-hidden rounded-3xl">
           <div className="grid md:grid-cols-2">
-            {/* Left Content */}
-            <div className="bg-blue-700 text-white p-10 lg:p-14 flex flex-col justify-center">
-              <h2 className="text-4xl font-bold leading-tight mb-6">
-                Are you hiring for your <br />
-                company in Korea?
+            <div className="flex flex-col justify-center bg-blue-700 p-10 text-white lg:p-14">
+              <h2 className="mb-6 text-4xl font-bold leading-tight">
+                {pick(locale, {
+                  mn: "Та БНСУ-д ажил хайж байна уу?",
+                  en: "Looking for work in Korea?",
+                  ko: "한국에서 일자리를 찾고 계신가요?",
+                })}
               </h2>
 
-              <p className="text-blue-100 text-lg leading-relaxed max-w-md mb-8">
-                Reach over 150,000 qualified Mongolian professionals already
-                living in Korea. Our platform streamlines your recruitment with
-                visa-ready talent.
+              <p className="mb-8 max-w-md text-lg leading-relaxed text-blue-100">
+                {pick(locale, {
+                  mn: "Үнэгүй бүртгүүлж, баталгаажсан ажлын байруудыг шууд судлаарай.",
+                  en: "Create a free account and browse verified opportunities across South Korea.",
+                  ko: "무료 계정을 만들고 한국 전역의 검증된 채용 공고를 살펴보세요.",
+                })}
               </p>
 
-              <div className="flex flex-wrap gap-4 mb-8">
+              <div className="mb-8 flex flex-wrap gap-4">
                 <Link
-                  href="/register?role=EMPLOYER"
-                  className="bg-white text-blue-700 px-7 py-4 rounded-xl font-semibold hover:bg-gray-100 transition"
+                  href="/jobs"
+                  className="rounded-xl bg-white px-7 py-4 font-semibold text-blue-700 transition hover:bg-gray-100"
                 >
-                  Post a Job for Free
+                  {pick(locale, { mn: "Ажлын заруудыг үзэх", en: "Browse Jobs", ko: "채용 공고 보기" })}
                 </Link>
 
                 <Link
-                  href="/recruiter"
-                  className="border border-blue-400 text-white px-7 py-4 rounded-xl font-medium hover:bg-blue-600 transition"
+                  href="/register"
+                  className="rounded-xl border border-blue-400 px-7 py-4 font-medium text-white transition hover:bg-blue-600"
                 >
-                  View Employer Portal
+                  {pick(locale, { mn: "Үнэгүй бүртгүүлэх", en: "Create Account", ko: "무료 회원가입" })}
                 </Link>
               </div>
 
               <div className="flex items-center gap-4">
                 <div className="flex -space-x-2">
-                  <img
-                    src="https://i.pravatar.cc/40?img=1"
-                    className="w-8 h-8 rounded-full border-2 border-blue-700"
-                    alt=""
-                  />
-                  <img
-                    src="https://i.pravatar.cc/40?img=2"
-                    className="w-8 h-8 rounded-full border-2 border-blue-700"
-                    alt=""
-                  />
-                  <img
-                    src="https://i.pravatar.cc/40?img=3"
-                    className="w-8 h-8 rounded-full border-2 border-blue-700"
-                    alt=""
-                  />
+                  <img src="https://i.pravatar.cc/40?img=1" className="h-8 w-8 rounded-full border-2 border-blue-700" alt="" />
+                  <img src="https://i.pravatar.cc/40?img=2" className="h-8 w-8 rounded-full border-2 border-blue-700" alt="" />
+                  <img src="https://i.pravatar.cc/40?img=3" className="h-8 w-8 rounded-full border-2 border-blue-700" alt="" />
                 </div>
-
-                <p className="text-blue-200 text-sm">
-                  Trusted by 850+ South Korean companies
+                <p className="text-sm text-blue-200">
+                  {pick(locale, {
+                    mn: "БНСУ дахь 850+ компани итгэдэг",
+                    en: "Trusted by 850+ South Korean companies",
+                    ko: "850개 이상의 한국 기업이 신뢰합니다",
+                  })}
                 </p>
               </div>
             </div>
 
-            {/* Right Image */}
-            <div className="hidden md:block relative min-h-125">
+            <div className="relative hidden min-h-125 md:block">
               <img
                 src="/employer--cta.png"
-                alt="Employer Dashboard"
-                className="absolute inset-0 w-full h-full object-cover"
+                alt={pick(locale, { mn: "Ажил хайгчийн самбар", en: "Job seeker dashboard", ko: "구직자 대시보드" })}
+                className="absolute inset-0 h-full w-full object-cover"
               />
             </div>
           </div>

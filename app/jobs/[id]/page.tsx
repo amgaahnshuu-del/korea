@@ -1,12 +1,20 @@
 "use client";
+
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
+import { Moon, Calendar, MapPin, Briefcase, Building2, Eye, ExternalLink, Users, Check, CheckCircle2, BadgeCheck, Phone } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { formatRelativeTime, formatSalary, getCategoryLabel, getJobTypeLabel, getTranslation, pick } from "@/lib/i18n";
+import { useLanguage } from "@/components/LanguageProvider";
 
-const JOB_TYPE_LABELS: Record<string, string> = { FULL_TIME: "Full-time", PART_TIME: "Part-time", CONTRACT: "Contract", INTERNSHIP: "Internship" };
-const JOB_TYPE_COLORS: Record<string, string> = { FULL_TIME: "bg-green-100 text-green-700", PART_TIME: "bg-blue-100 text-blue-700", CONTRACT: "bg-purple-100 text-purple-700", INTERNSHIP: "bg-yellow-100 text-yellow-700" };
+const JOB_TYPE_COLORS: Record<string, string> = {
+  FULL_TIME: "bg-green-100 text-green-700",
+  PART_TIME: "bg-blue-100 text-blue-700",
+  CONTRACT: "bg-purple-100 text-purple-700",
+  INTERNSHIP: "bg-yellow-100 text-yellow-700",
+};
 
 interface Job {
   id: string;
@@ -21,19 +29,25 @@ interface Job {
   salaryMax: number | null;
   createdAt: string;
   views: number;
-  company: { id: string; name: string; logo: string | null; description: string | null; industry: string | null; location: string | null; size: string | null; verified: boolean; website: string | null };
+  contactPhone: string | null;
+  company: {
+    id: string;
+    name: string;
+    logo: string | null;
+    description: string | null;
+    industry: string | null;
+    location: string | null;
+    size: string | null;
+    verified: boolean;
+    website: string | null;
+  };
   _count: { applications: number };
 }
 
-function formatSalary(min?: number | null, max?: number | null) {
-  if (!min && !max) return "Negotiable";
-  const fmt = (n: number) => n >= 10000 ? `${(n / 10000).toFixed(0)}만원` : `${n.toLocaleString()}원`;
-  if (min && max) return `${fmt(min)} – ${fmt(max)}`;
-  if (min) return `${fmt(min)}~`;
-  return `~${fmt(max!)}`;
-}
-
 export default function JobDetailPage() {
+  const { locale } = useLanguage();
+  const t = getTranslation(locale, "jobs");
+  const common = getTranslation(locale, "common");
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const [job, setJob] = useState<Job | null>(null);
@@ -43,22 +57,39 @@ export default function JobDetailPage() {
   const [message, setMessage] = useState("");
   const [applied, setApplied] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [cvText, setCvText] = useState("");
+  const [cvLoading, setCvLoading] = useState(false);
 
   useEffect(() => {
     fetch(`/api/jobs/${id}`)
       .then((r) => r.json())
-      .then((d) => { setJob(d.job); setLoading(false); })
+      .then((d) => {
+        setJob(d.job);
+        setLoading(false);
+      })
       .catch(() => setLoading(false));
   }, [id]);
+
+  const openModal = async () => {
+    setShowModal(true);
+    setCvLoading(true);
+    const res = await fetch("/api/auth/cv");
+    const data = await res.json();
+    setCvText(data.cvText || "");
+    setCvLoading(false);
+  };
 
   const handleApply = async () => {
     setApplying(true);
     const res = await fetch(`/api/jobs/${id}/apply`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message }),
+      body: JSON.stringify({ message: cvText }),
     });
-    if (res.status === 401) { router.push("/login"); return; }
+    if (res.status === 401) {
+      router.push("/login");
+      return;
+    }
     if (res.ok || res.status === 409) {
       setApplied(true);
       setShowModal(false);
@@ -66,115 +97,131 @@ export default function JobDetailPage() {
     setApplying(false);
   };
 
-  if (loading) return (
-    <div className="flex flex-col min-h-screen">
-      <Navbar />
-      <div className="flex-1 flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-blue-700 border-t-transparent rounded-full animate-spin"></div>
+  if (loading) {
+    return (
+      <div className="flex min-h-screen flex-col">
+        <Navbar />
+        <div className="flex flex-1 items-center justify-center">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-700 border-t-transparent" />
+        </div>
       </div>
-    </div>
-  );
+    );
+  }
 
-  if (!job) return (
-    <div className="flex flex-col min-h-screen">
-      <Navbar />
-      <div className="flex-1 flex items-center justify-center flex-col gap-4">
-        <p className="text-gray-500">Job not found.</p>
-        <Link href="/jobs" className="text-blue-600 underline">Back to Jobs</Link>
+  if (!job) {
+    return (
+      <div className="flex min-h-screen flex-col">
+        <Navbar />
+        <div className="flex flex-1 flex-col items-center justify-center gap-4">
+          <p className="text-gray-500">{t.jobNotFound}</p>
+          <Link href="/jobs" className="text-blue-600 underline">
+            {t.backToJobs}
+          </Link>
+        </div>
       </div>
-    </div>
-  );
+    );
+  }
+
+  const labels = {
+    monthlySalary: pick(locale, { mn: "Сарын цалин", en: "Monthly salary", ko: "월급" }),
+    experience: pick(locale, { mn: "Туршлага", en: "Experience", ko: "경력" }),
+    visaType: pick(locale, { mn: "Визний төрөл", en: "Visa type", ko: "비자 유형" }),
+    posted: pick(locale, { mn: "Нийтлэгдсэн", en: "Posted", ko: "등록됨" }),
+    shiftWork: pick(locale, { mn: "Ээлжийн ажил", en: "Shift work", ko: "교대 근무" }),
+    rotation: pick(locale, { mn: "Өдөр / Шөнө ээлжилнэ", en: "Day / Night rotation", ko: "주/야 교대" }),
+    overtime: pick(locale, { mn: "Илүү цагийн цалинтай", en: "Including overtime pay", ko: "야근 수당 포함" }),
+    verified: pick(locale, { mn: "Баталгаажсан", en: "Verified", ko: "인증됨" }),
+    applicants: pick(locale, { mn: "өргөдөл гаргагч", en: "applicants", ko: "지원자" }),
+    views: pick(locale, { mn: "үзэлт", en: "views", ko: "조회" }),
+    employees: pick(locale, { mn: "ажилтан", en: "employees", ko: "직원" }),
+  };
 
   return (
-    <div className="flex flex-col min-h-screen bg-gray-50">
+    <div className="flex min-h-screen flex-col bg-gray-50">
       <Navbar />
 
-      <div className="max-w-6xl mx-auto w-full px-4 py-8 flex gap-8 flex-col lg:flex-row">
-        {/* Main Content */}
+      <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-8 lg:flex-row">
         <div className="flex-1">
-          {/* Job Header */}
-          <div className="bg-white rounded-2xl border border-gray-200 p-6 mb-6">
+          <div className="mb-6 rounded-2xl border border-gray-200 bg-white p-6">
             <div className="flex items-start gap-4">
-              <div className="w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center text-blue-700 font-bold text-2xl">
+              <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-blue-100 text-2xl font-bold text-blue-700">
                 {job.company.name.charAt(0)}
               </div>
               <div className="flex-1">
-                <div className="flex flex-wrap items-center gap-2 mb-1">
-                  <span className={`text-xs px-2 py-1 rounded-full font-medium ${JOB_TYPE_COLORS[job.type]}`}>{JOB_TYPE_LABELS[job.type]}</span>
-                  <span className="text-xs px-2 py-1 rounded-full bg-gray-100 text-gray-600">{job.category}</span>
-                  {job.company.verified && <span className="text-xs px-2 py-1 rounded-full bg-blue-50 text-blue-600">✓ Verified</span>}
+                <div className="mb-1 flex flex-wrap items-center gap-2">
+                  <span className={`rounded-full px-2 py-1 text-xs font-medium ${JOB_TYPE_COLORS[job.type]}`}>
+                    {getJobTypeLabel(locale, job.type)}
+                  </span>
+                  <span className="rounded-full bg-gray-100 px-2 py-1 text-xs text-gray-600">{getCategoryLabel(locale, job.category)}</span>
+                  {job.company.verified && <span className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2 py-1 text-xs text-blue-600"><BadgeCheck size={12} /> {labels.verified}</span>}
                 </div>
-                <h1 className="text-2xl font-bold text-gray-900 mt-2">{job.title}</h1>
-                <p className="text-gray-500 mt-1">{job.company.name} · {job.location}</p>
+                <h1 className="mt-2 text-2xl font-bold text-gray-900">{job.title}</h1>
+                <p className="mt-1 text-gray-500">{job.company.name} · {job.location}</p>
 
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-5">
-                  <div className="bg-gray-50 rounded-xl p-3 text-center">
-                    <div className="text-blue-700 font-bold text-sm">{formatSalary(job.salaryMin, job.salaryMax)}</div>
-                    <div className="text-xs text-gray-400 mt-1">Monthly Salary</div>
-                  </div>
-                  <div className="bg-gray-50 rounded-xl p-3 text-center">
-                    <div className="text-blue-700 font-bold text-sm">{job.type === "FULL_TIME" ? "3-5 Years" : "Any"}</div>
-                    <div className="text-xs text-gray-400 mt-1">Experience</div>
-                  </div>
-                  <div className="bg-gray-50 rounded-xl p-3 text-center">
-                    <div className="text-blue-700 font-bold text-sm">E-9 / E-7</div>
-                    <div className="text-xs text-gray-400 mt-1">Visa Type</div>
-                  </div>
-                  <div className="bg-gray-50 rounded-xl p-3 text-center">
-                    <div className="text-blue-700 font-bold text-sm">
-                      {Math.floor((Date.now() - new Date(job.createdAt).getTime()) / 86400000)}d ago
+                <div className="mt-5 grid grid-cols-2 gap-4 sm:grid-cols-4">
+                  <div className="rounded-xl bg-gray-50 p-3 text-center">
+                    <div className="text-sm font-bold text-blue-700">
+                      {formatSalary(locale, job.salaryMin, job.salaryMax) || pick(locale, { mn: "Тохиролцоно", en: "Negotiable", ko: "협의" })}
                     </div>
-                    <div className="text-xs text-gray-400 mt-1">Posted</div>
+                    <div className="mt-1 text-xs text-gray-400">{labels.monthlySalary}</div>
+                  </div>
+                  <div className="rounded-xl bg-gray-50 p-3 text-center">
+                    <div className="text-sm font-bold text-blue-700">{job.type === "FULL_TIME" ? pick(locale, { mn: "3-5 жил", en: "3-5 years", ko: "3-5년" }) : pick(locale, { mn: "Аль ч", en: "Any", ko: "무관" })}</div>
+                    <div className="mt-1 text-xs text-gray-400">{labels.experience}</div>
+                  </div>
+                  <div className="rounded-xl bg-gray-50 p-3 text-center">
+                    <div className="text-sm font-bold text-blue-700">E-9 / E-7</div>
+                    <div className="mt-1 text-xs text-gray-400">{labels.visaType}</div>
+                  </div>
+                  <div className="rounded-xl bg-gray-50 p-3 text-center">
+                    <div className="text-sm font-bold text-blue-700">{formatRelativeTime(locale, job.createdAt)}</div>
+                    <div className="mt-1 text-xs text-gray-400">{labels.posted}</div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Job Description */}
-          <div className="bg-white rounded-2xl border border-gray-200 p-6 mb-6">
-            <h2 className="text-lg font-bold text-gray-900 mb-4">Job Description</h2>
-            <div className="text-gray-600 text-sm leading-relaxed whitespace-pre-line">{job.description}</div>
+          <div className="mb-6 rounded-2xl border border-gray-200 bg-white p-6">
+            <h2 className="mb-4 text-lg font-bold text-gray-900">{t.jobDescription}</h2>
+            <div className="whitespace-pre-line text-sm leading-relaxed text-gray-600">{job.description}</div>
           </div>
 
-          {/* Requirements */}
           {job.requirements && (
-            <div className="bg-white rounded-2xl border border-gray-200 p-6 mb-6">
-              <h2 className="text-lg font-bold text-gray-900 mb-4">Requirements</h2>
-              <div className="text-gray-600 text-sm leading-relaxed whitespace-pre-line">{job.requirements}</div>
+            <div className="mb-6 rounded-2xl border border-gray-200 bg-white p-6">
+              <h2 className="mb-4 text-lg font-bold text-gray-900">{t.requirementTitle}</h2>
+              <div className="whitespace-pre-line text-sm leading-relaxed text-gray-600">{job.requirements}</div>
             </div>
           )}
 
-          {/* Work Schedule */}
-          <div className="bg-white rounded-2xl border border-gray-200 p-6 mb-6">
-            <h2 className="text-lg font-bold text-gray-900 mb-4">Work Schedule</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="flex items-center gap-3 bg-gray-50 rounded-xl p-3">
-                <span className="text-2xl">🌙</span>
+          <div className="mb-6 rounded-2xl border border-gray-200 bg-white p-6">
+            <h2 className="mb-4 text-lg font-bold text-gray-900">{t.scheduleTitle}</h2>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div className="flex items-center gap-3 rounded-xl bg-gray-50 p-3">
+                <Moon className="h-6 w-6 shrink-0 text-blue-500" />
                 <div>
-                  <p className="text-sm font-semibold">Shift Work</p>
-                  <p className="text-xs text-gray-500">Day / Night Rotation</p>
+                  <p className="text-sm font-semibold">{labels.shiftWork}</p>
+                  <p className="text-xs text-gray-500">{labels.rotation}</p>
                 </div>
               </div>
-              <div className="flex items-center gap-3 bg-gray-50 rounded-xl p-3">
-                <span className="text-2xl">📅</span>
+              <div className="flex items-center gap-3 rounded-xl bg-gray-50 p-3">
+                <Calendar className="h-6 w-6 shrink-0 text-blue-500" />
                 <div>
-                  <p className="text-sm font-semibold">Mon – Fri</p>
-                  <p className="text-xs text-gray-500">Including Overtime Pay</p>
+                  <p className="text-sm font-semibold">{pick(locale, { mn: "Даваа – Баасан", en: "Mon – Fri", ko: "월 – 금" })}</p>
+                  <p className="text-xs text-gray-500">{labels.overtime}</p>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Benefits */}
           {job.benefits && (
-            <div className="bg-white rounded-2xl border border-gray-200 p-6 mb-6">
-              <h2 className="text-lg font-bold text-gray-900 mb-4">Benefits & Perks</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {job.benefits.split("\n").map((b, i) => (
+            <div className="mb-6 rounded-2xl border border-gray-200 bg-white p-6">
+              <h2 className="mb-4 text-lg font-bold text-gray-900">{t.benefitsTitle}</h2>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                {job.benefits.split("\n").map((benefit, i) => (
                   <div key={i} className="flex items-center gap-2 text-sm text-gray-700">
-                    <span className="text-green-500 font-bold">✓</span>
-                    {b}
+                    <Check className="h-4 w-4 shrink-0 text-green-500" />
+                    {benefit}
                   </div>
                 ))}
               </div>
@@ -182,92 +229,118 @@ export default function JobDetailPage() {
           )}
         </div>
 
-        {/* Sidebar */}
-        <div className="w-full lg:w-72 shrink-0">
-          <div className="bg-white rounded-2xl border border-gray-200 p-5 mb-4 sticky top-24">
-            <div className="text-xl font-bold text-gray-900 mb-1">{formatSalary(job.salaryMin, job.salaryMax)}</div>
-            <p className="text-xs text-gray-400 mb-4">per month</p>
+        <div className="w-full shrink-0 lg:w-72">
+          <div className="sticky top-24 mb-4 rounded-2xl border border-gray-200 bg-white p-5">
+            <div className="mb-1 text-xl font-bold text-gray-900">
+              {formatSalary(locale, job.salaryMin, job.salaryMax) || pick(locale, { mn: "Тохиролцоно", en: "Negotiable", ko: "협의" })}
+            </div>
+            <p className="mb-4 text-xs text-gray-400">{pick(locale, { mn: "сард", en: "per month", ko: "월" })}</p>
 
             {applied ? (
-              <div className="bg-green-50 text-green-700 border border-green-200 rounded-xl p-3 text-sm text-center font-semibold mb-3">
-                ✓ Applied Successfully!
+              <div className="mb-3 flex items-center justify-center gap-2 rounded-xl border border-green-200 bg-green-50 p-3 text-sm font-semibold text-green-700">
+                <CheckCircle2 size={16} /> {t.applySuccess}
               </div>
             ) : (
               <button
-                onClick={() => setShowModal(true)}
-                className="w-full bg-blue-700 text-white py-3 rounded-xl font-semibold text-sm hover:bg-blue-800 transition mb-3"
+                onClick={openModal}
+                className="mb-3 w-full rounded-xl bg-blue-700 py-3 text-sm font-semibold text-white transition hover:bg-blue-800"
               >
-                Apply Now →
+                {pick(locale, { mn: "CV илгээх", en: "Send CV", ko: "CV 보내기" })} →
               </button>
             )}
 
             <button
               onClick={() => setSaved(!saved)}
-              className={`w-full py-2.5 rounded-xl font-semibold text-sm border transition ${saved ? "bg-yellow-50 border-yellow-300 text-yellow-700" : "border-gray-200 text-gray-600 hover:bg-gray-50"}`}
+              className={`w-full rounded-xl border py-2.5 text-sm font-semibold transition ${saved ? "border-yellow-300 bg-yellow-50 text-yellow-700" : "border-gray-200 text-gray-600 hover:bg-gray-50"}`}
             >
-              {saved ? "✓ Saved" : "Save Job"}
+              {saved ? <span className="inline-flex items-center gap-1"><Check size={14} /> {common.saved}</span> : common.saveJob}
             </button>
 
-            <div className="mt-4 pt-4 border-t border-gray-100 space-y-3 text-sm text-gray-600">
+            <div className="mt-4 space-y-3 border-t border-gray-100 pt-4 text-sm text-gray-600">
               <div className="flex items-center gap-2">
-                <span>📍</span><span>{job.location}</span>
+                <MapPin size={14} className="shrink-0 text-gray-400" /><span>{job.location}</span>
               </div>
               <div className="flex items-center gap-2">
-                <span>💼</span><span>{JOB_TYPE_LABELS[job.type]}</span>
+                <Briefcase size={14} className="shrink-0 text-gray-400" /><span>{getJobTypeLabel(locale, job.type)}</span>
               </div>
               <div className="flex items-center gap-2">
-                <span>🏢</span><span>{job.category}</span>
+                <Building2 size={14} className="shrink-0 text-gray-400" /><span>{getCategoryLabel(locale, job.category)}</span>
               </div>
               <div className="flex items-center gap-2">
-                <span>👁️</span><span>{job.views} views · {job._count.applications} applicants</span>
+                <Eye size={14} className="shrink-0 text-gray-400" />
+                <span>
+                  {job.views} {labels.views} · {job._count.applications} {labels.applicants}
+                </span>
               </div>
             </div>
 
-            <a href={job.company.website || "#"} className="mt-4 block text-center text-sm text-blue-600 hover:underline">
-              🔗 Visit Company Website
-            </a>
+            {job.contactPhone && (
+              <a href={`tel:${job.contactPhone}`} className="mt-4 flex items-center justify-center gap-1.5 rounded-xl border border-blue-200 bg-blue-50 py-2.5 text-sm font-semibold text-blue-700 transition hover:bg-blue-100">
+                <Phone size={14} /> {job.contactPhone}
+              </a>
+            )}
           </div>
 
-          {/* Company Info */}
-          <div className="bg-white rounded-2xl border border-gray-200 p-5">
-            <h3 className="font-semibold text-gray-800 mb-3">About the Employer</h3>
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center text-blue-700 font-bold">
+          <div className="rounded-2xl border border-gray-200 bg-white p-5">
+            <h3 className="mb-3 font-semibold text-gray-800">{t.aboutEmployer}</h3>
+            <div className="mb-3 flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-100 font-bold text-blue-700">
                 {job.company.name.charAt(0)}
               </div>
               <div>
-                <p className="font-semibold text-sm">{job.company.name}</p>
-                <p className="text-xs text-gray-400">{job.company.industry || job.category}</p>
+                <p className="text-sm font-semibold">{job.company.name}</p>
+                <p className="text-xs text-gray-400">{job.company.industry || getCategoryLabel(locale, job.category)}</p>
               </div>
             </div>
-            {job.company.description && <p className="text-xs text-gray-500 line-clamp-3">{job.company.description}</p>}
-            {job.company.size && <p className="text-xs text-gray-400 mt-2">👥 {job.company.size} employees</p>}
+            {job.company.description && <p className="line-clamp-3 text-xs text-gray-500">{job.company.description}</p>}
+            {job.company.size && <p className="mt-2 flex items-center gap-1 text-xs text-gray-400"><Users size={12} /> {job.company.size} {labels.employees}</p>}
           </div>
         </div>
       </div>
 
-      {/* Apply Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-xl">
-            <h3 className="text-lg font-bold text-gray-900 mb-1">Apply for {job.title}</h3>
-            <p className="text-sm text-gray-500 mb-4">{job.company.name}</p>
-            <textarea
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              placeholder="Write a short message to the employer (optional)..."
-              className="w-full border border-gray-200 rounded-xl p-3 text-sm outline-none resize-none h-32 focus:border-blue-400"
-            />
-            <div className="flex gap-3 mt-4">
-              <button onClick={() => setShowModal(false)} className="flex-1 py-2.5 border border-gray-200 rounded-xl text-sm font-semibold hover:bg-gray-50">
-                Cancel
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl">
+            <h3 className="mb-1 text-lg font-bold text-gray-900">
+              {pick(locale, { mn: "CV илгээх", en: "Send CV", ko: "CV 보내기" })}
+            </h3>
+            <p className="mb-4 text-sm text-gray-500">{job.title} · {job.company.name}</p>
+
+            {cvLoading ? (
+              <div className="flex h-40 items-center justify-center">
+                <div className="h-6 w-6 animate-spin rounded-full border-4 border-blue-700 border-t-transparent" />
+              </div>
+            ) : cvText ? (
+              <textarea
+                value={cvText}
+                onChange={(e) => setCvText(e.target.value)}
+                rows={10}
+                className="w-full resize-y rounded-xl border border-gray-200 bg-gray-50 p-3 text-sm leading-relaxed outline-none focus:border-blue-400 focus:bg-white"
+              />
+            ) : (
+              <div className="flex h-40 flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-gray-200 bg-gray-50 text-center">
+                <p className="text-sm text-gray-400">
+                  {pick(locale, { mn: "CV бичигдээгүй байна", en: "No CV written yet", ko: "CV가 작성되지 않았습니다" })}
+                </p>
+                <a
+                  href="/dashboard"
+                  className="rounded-lg bg-blue-700 px-4 py-1.5 text-xs font-semibold text-white hover:bg-blue-800"
+                >
+                  {pick(locale, { mn: "CV бичих", en: "Write CV", ko: "CV 작성" })}
+                </a>
+              </div>
+            )}
+
+            <div className="mt-4 flex gap-3">
+              <button onClick={() => setShowModal(false)} className="flex-1 rounded-xl border border-gray-200 py-2.5 text-sm font-semibold hover:bg-gray-50">
+                {t.cancel}
               </button>
               <button
                 onClick={handleApply}
-                disabled={applying}
-                className="flex-1 py-2.5 bg-blue-700 text-white rounded-xl text-sm font-semibold hover:bg-blue-800 disabled:opacity-60"
+                disabled={applying || !cvText}
+                className="flex-1 rounded-xl bg-blue-700 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-800 disabled:opacity-60"
               >
-                {applying ? "Submitting..." : "Submit Application"}
+                {applying ? t.submitting : pick(locale, { mn: "Илгээх", en: "Send", ko: "보내기" })}
               </button>
             </div>
           </div>

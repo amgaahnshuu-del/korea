@@ -1,107 +1,142 @@
+import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import Link from "next/link";
+import { Plane, User } from "lucide-react";
+import { getTranslation, pick, type Locale } from "@/lib/i18n";
+import { getLocale } from "@/lib/i18n-server";
 
-const TEAM = [
-  { name: "Ariunbold T.", role: "CEO / CO-FOUNDER", bg: "bg-gray-200" },
-  { name: "Mina Park", role: "Head of Operations, Seoul, Korea", bg: "bg-gray-300" },
-  { name: "Gantulaar L.", role: "Legal Counselor", bg: "bg-gray-200" },
-  { name: "Yalj Ohal", role: "Lead Engineer", bg: "bg-gray-300" },
-];
+type TimelineItem = {
+  year: string;
+  title: string;
+  desc: string;
+};
 
-const TIMELINE = [
-  { year: "2015", title: "The Spark", desc: "Founded in Ulaanbaatar, an entrepreneur who experienced first-hand the struggles of finding stable employment overseas." },
-  { year: "2018", title: "The Seoul Office", desc: "Opened our Seoul office to build direct relationships with South Korean employers, streamlining visa pathways." },
-  { year: "2024", title: "Digital Transformation", desc: "Today, Ajil Korea is a fully digital platform, using advanced matchmaking tools to help candidates find jobs, fast and TOPIK-free." },
-];
+function getTimeline(locale: Locale): TimelineItem[] {
+  return [
+    {
+      year: "2015",
+      title: pick(locale, { mn: "Анхны оч", en: "The Spark", ko: "첫 시작" }),
+      desc: pick(locale, {
+        mn: "Улаанбаатарт үүсгэн байгуулагдсан бөгөөд гадаадад тогтвортой ажил олоход тулгардаг бэрхшээлийг биеэр мэдэрсэн энтрепренёрын санаанаас эхэлсэн.",
+        en: "Founded in Ulaanbaatar, inspired by an entrepreneur who experienced first-hand the challenge of finding stable work overseas.",
+        ko: "울란바토르에서 시작되었으며, 해외에서 안정적인 일자리를 찾는 어려움을 직접 겪은 창업가의 경험에서 출발했습니다.",
+      }),
+    },
+    {
+      year: "2018",
+      title: pick(locale, { mn: "Сөүл дэх оффис", en: "The Seoul Office", ko: "서울 오피스" }),
+      desc: pick(locale, {
+        mn: "Солонгосын ажил олгогчидтой шууд хамтран ажиллахын тулд Сөүл дэх салбараа нээж, визний процессийг хөнгөвчлөв.",
+        en: "Opened our Seoul office to build direct relationships with South Korean employers and streamline visa pathways.",
+        ko: "한국 고용주와 직접 협력하고 비자 절차를 단순화하기 위해 서울 오피스를 열었습니다.",
+      }),
+    },
+    {
+      year: "2024",
+      title: pick(locale, { mn: "Дижитал шилжилт", en: "Digital Transformation", ko: "디지털 전환" }),
+      desc: pick(locale, {
+        mn: "Өнөөдөр Ajil Korea нь орчин үеийн тохируулах хэрэгслүүдээр нэр дэвшигчдийг хурдан, TOPIK-гүйгээр ажилтай холбодог бүрэн дижитал платформ болсон.",
+        en: "Today, Ajil Korea is a fully digital platform using smart matching tools to help candidates find jobs faster and without TOPIK requirements.",
+        ko: "오늘날 Ajil Korea는 스마트 매칭 도구를 활용해 지원자가 더 빠르게, TOPIK 없이도 일자리를 찾도록 돕는 완전한 디지털 플랫폼입니다.",
+      }),
+    },
+  ];
+}
 
-export default function AboutPage() {
+function getTeam(locale: Locale) {
+  return [
+    { name: "Ariunbold T.", role: pick(locale, { mn: "Гүйцэтгэх захирал / Үүсгэн байгуулагч", en: "CEO / Co-founder", ko: "CEO / 공동 창업자" }), bg: "bg-gray-200" },
+    { name: "Mina Park", role: pick(locale, { mn: "Үйл ажиллагааны ахлагч, Сөүл", en: "Head of Operations, Seoul", ko: "운영 총괄, 서울" }), bg: "bg-gray-300" },
+    { name: "Gantulaar L.", role: pick(locale, { mn: "Хууль зүйн зөвлөх", en: "Legal Counselor", ko: "법률 자문" }), bg: "bg-gray-200" },
+    { name: "Yalj Ohal", role: pick(locale, { mn: "Ахлах инженер", en: "Lead Engineer", ko: "수석 엔지니어" }), bg: "bg-gray-300" },
+  ];
+}
+
+export default async function AboutPage() {
+  const locale = await getLocale();
+  const t = getTranslation(locale, "about");
+  const timeline = getTimeline(locale);
+  const team = getTeam(locale);
+
+  const values = t.values ?? [];
+
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex min-h-screen flex-col">
       <Navbar />
 
-      {/* Hero */}
-      <section className="bg-linear-to-br from-blue-900 to-blue-700 text-white py-20 px-4">
-        <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center gap-12">
+      <section className="bg-linear-to-br from-blue-900 to-blue-700 px-4 py-20 text-white">
+        <div className="mx-auto flex max-w-6xl flex-col items-center gap-12 md:flex-row">
           <div className="flex-1">
-            <div className="inline-block bg-blue-600/40 border border-blue-400/30 text-blue-200 text-xs px-3 py-1 rounded-full mb-4">
-              ABOUT US — SINCE 2015
+            <div className="mb-4 inline-block rounded-full border border-blue-400/30 bg-blue-600/40 px-3 py-1 text-xs text-blue-200">
+              {t.badge}
             </div>
-            <h1 className="text-4xl font-extrabold mb-4 leading-tight">
-              Bridging the Gap Between <span className="text-yellow-300">Mongolian Talent</span> and Korean Employers.
+            <h1 className="mb-4 text-4xl font-extrabold leading-tight">
+              {t.heading}
             </h1>
-            <p className="text-blue-100 text-sm mb-6">
-              Ajil Korea is the premier digital ecosystem dedicated to simplifying international employment. We provide a transparent, high-integrity platform that empowers Mongolians job seekers to find meaningful careers in South Korea.
-            </p>
+            <p className="mb-6 text-sm text-blue-100">{t.description}</p>
             <div className="flex gap-4">
-              <Link href="/jobs" className="bg-white text-blue-700 font-semibold px-5 py-2.5 rounded-xl hover:bg-blue-50 transition text-sm">
-                View Our Jobs
+              <Link href="/jobs" className="rounded-xl bg-white px-5 py-2.5 text-sm font-semibold text-blue-700 transition hover:bg-blue-50">
+                {t.viewJobs}
               </Link>
-              <a href="#team" className="border border-white text-white font-semibold px-5 py-2.5 rounded-xl hover:bg-blue-800 transition text-sm">
-                Learn About Team
+              <a href="#team" className="rounded-xl border border-white px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-800">
+                {t.learnTeam}
               </a>
             </div>
           </div>
-          <div className="hidden md:flex flex-col gap-3 items-center">
-            <div className="bg-blue-600/50 rounded-2xl p-5 text-center w-40">
+          <div className="hidden flex-col items-center gap-3 md:flex">
+            <div className="w-40 rounded-2xl bg-blue-600/50 p-5 text-center">
               <div className="text-3xl font-bold">5,000+</div>
-              <div className="text-xs text-blue-200">Placed This Year</div>
+              <div className="text-xs text-blue-200">{pick(locale, { mn: "Энэ жил байршуулсан", en: "Placed this year", ko: "올해 배치" })}</div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Values */}
-      <section className="py-16 px-4 bg-white">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-2xl font-bold text-gray-900 text-center mb-2">Integrity in Every Connection</h2>
-          <p className="text-center text-gray-500 text-sm mb-10">Our defining qualities in every business we conduct and every connection we facilitate for our customers.</p>
+      <section className="bg-white px-4 py-16">
+        <div className="mx-auto max-w-6xl">
+          <h2 className="mb-2 text-center text-2xl font-bold text-gray-900">{t.valuesTitle}</h2>
+          <p className="mb-10 text-center text-sm text-gray-500">{t.valuesDescription}</p>
 
-          <div className="grid md:grid-cols-3 gap-6">
-            {[
-              { icon: "🔍", title: "Radical Transparency", desc: "We believe you deserve to know who is hiring and what to expect. Our verification system ensures every job listing, employer profile, and salary range is authentic." },
-              { icon: "🌐", title: "Bilingual Support", desc: "Our team offers native Mongolian and Korean-speaking agents available to help you communicate and grow throughout your entire journey." },
-              { icon: "🎯", title: "Skill Matching", desc: "We match you with roles that suit not only your skills but your long-term career ambitions. Our AI-powered system evaluates job requirements across Korea." },
-            ].map((v) => (
-              <div key={v.title} className="bg-gray-50 rounded-2xl p-6">
-                <div className="text-3xl mb-3">{v.icon}</div>
-                <h3 className="font-bold text-gray-900 mb-2">{v.title}</h3>
-                <p className="text-sm text-gray-500 leading-relaxed">{v.desc}</p>
+          <div className="grid gap-6 md:grid-cols-3">
+            {values.map((value: { title: string; desc: string }) => (
+              <div key={value.title} className="rounded-2xl bg-gray-50 p-6">
+                <h3 className="mb-2 font-bold text-gray-900">{value.title}</h3>
+                <p className="text-sm leading-relaxed text-gray-500">{value.desc}</p>
               </div>
             ))}
           </div>
 
-          <div className="mt-8 bg-blue-50 border border-blue-100 rounded-2xl p-6 text-center">
-            <h3 className="font-bold text-blue-800 text-lg mb-2">The Ajil Promise</h3>
-            <p className="text-sm text-blue-700">Every decision in our platform is 100% transparent and fair. Our application process is real-time, our employers are real, our listings are valid, and your success is always our focus.</p>
+          <div className="mt-8 rounded-2xl border border-blue-100 bg-blue-50 p-6 text-center">
+            <h3 className="mb-2 text-lg font-bold text-blue-800">{t.promiseTitle}</h3>
+            <p className="text-sm text-blue-700">{t.promiseText}</p>
           </div>
         </div>
       </section>
 
-      {/* Pre-Departure */}
-      <section className="py-12 px-4 bg-blue-700 text-white">
-        <div className="max-w-6xl mx-auto text-center">
-          <div className="text-3xl mb-3">✈️</div>
-          <h2 className="text-xl font-bold mb-2">Pre-Departure Training</h2>
-          <p className="text-blue-100 text-sm max-w-lg mx-auto">Comprehensive orientation training before you make your flight. Learn South Korean workplace culture, safety requirements, and basic communication to hit the ground running.</p>
+      <section className="bg-blue-700 px-4 py-12 text-white">
+        <div className="mx-auto max-w-6xl text-center">
+          <Plane className="mx-auto mb-3 h-8 w-8" />
+          <h2 className="mb-2 text-xl font-bold">{t.trainingTitle}</h2>
+          <p className="mx-auto max-w-lg text-sm text-blue-100">{t.trainingText}</p>
         </div>
       </section>
 
-      {/* Journey Timeline */}
-      <section className="py-16 px-4 bg-gray-50">
-        <div className="max-w-3xl mx-auto">
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Our Journey from Ulaanbaatar to Seoul</h2>
-          <p className="text-gray-500 text-sm mb-10">Over a decade of connecting people to opportunity.</p>
+      <section className="bg-gray-50 px-4 py-16">
+        <div className="mx-auto max-w-3xl">
+          <h2 className="mb-2 text-2xl font-bold text-gray-900">{t.timelineTitle}</h2>
+          <p className="mb-10 text-sm text-gray-500">{pick(locale, { mn: "Боломжтой холбосон арван жилийн түүх.", en: "Over a decade of connecting people to opportunity.", ko: "기회를 연결해 온 10년의 여정." })}</p>
           <div className="space-y-8">
-            {TIMELINE.map((item, i) => (
-              <div key={i} className="flex gap-5">
+            {timeline.map((item, i) => (
+              <div key={item.year} className="flex gap-5">
                 <div className="flex flex-col items-center">
-                  <div className="w-10 h-10 bg-blue-700 text-white rounded-full flex items-center justify-center text-sm font-bold shrink-0">{i + 1}</div>
-                  {i < TIMELINE.length - 1 && <div className="w-px flex-1 bg-blue-200 mt-2"></div>}
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-700 text-sm font-bold text-white">
+                    {i + 1}
+                  </div>
+                  {i < timeline.length - 1 && <div className="mt-2 flex-1 w-px bg-blue-200" />}
                 </div>
                 <div className="pb-8">
-                  <div className="text-xs text-blue-600 font-semibold mb-1">Since {item.year}</div>
-                  <h3 className="font-bold text-gray-900 mb-1">{item.title}</h3>
+                  <div className="mb-1 text-xs font-semibold text-blue-600">{pick(locale, { mn: "2015 оноос", en: `Since ${item.year}`, ko: `${item.year}년부터` })}</div>
+                  <h3 className="mb-1 font-bold text-gray-900">{item.title}</h3>
                   <p className="text-sm text-gray-500">{item.desc}</p>
                 </div>
               </div>
@@ -110,40 +145,40 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Team */}
-      <section id="team" className="py-16 px-4 bg-white">
-        <div className="max-w-6xl mx-auto">
-          <div className="flex items-center justify-between mb-8">
+      <section id="team" className="bg-white px-4 py-16">
+        <div className="mx-auto max-w-6xl">
+          <div className="mb-8 flex items-center justify-between">
             <div>
-              <h2 className="text-2xl font-bold text-gray-900">The Minds Behind the Bridge</h2>
-              <p className="text-sm text-gray-500 mt-1">A dedicated team of expert agents, integration leaders, and engineers.</p>
+              <h2 className="text-2xl font-bold text-gray-900">{t.teamTitle}</h2>
+              <p className="mt-1 text-sm text-gray-500">{t.teamSubtitle}</p>
             </div>
-            <Link href="/register" className="text-sm font-semibold text-blue-600 hover:underline">Join the Team →</Link>
+            <Link href="/register" className="text-sm font-semibold text-blue-600 hover:underline">
+              {pick(locale, { mn: "Багт нэгдэх →", en: "Join the Team →", ko: "팀에 합류 →" })}
+            </Link>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
-            {TEAM.map((member) => (
+          <div className="grid grid-cols-2 gap-6 sm:grid-cols-4">
+            {team.map((member) => (
               <div key={member.name} className="text-center">
-                <div className={`w-24 h-24 ${member.bg} rounded-2xl mx-auto mb-3 flex items-center justify-center text-3xl`}>
-                  👤
+                <div className={`mx-auto mb-3 flex h-24 w-24 items-center justify-center rounded-2xl ${member.bg}`}>
+                  <User className="h-10 w-10 text-current opacity-60" />
                 </div>
-                <p className="font-semibold text-gray-900 text-sm">{member.name}</p>
-                <p className="text-xs text-gray-400 mt-1">{member.role}</p>
+                <p className="text-sm font-semibold text-gray-900">{member.name}</p>
+                <p className="mt-1 text-xs text-gray-400">{member.role}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="py-16 px-4 bg-blue-700 text-white text-center">
-        <h2 className="text-2xl font-bold mb-2">Ready to start your journey to Korea?</h2>
-        <p className="text-blue-100 text-sm mb-6">Join thousands of Mongolian professionals who found their future through Ajil Korea.</p>
+      <section className="bg-blue-700 px-4 py-16 text-center text-white">
+        <h2 className="mb-2 text-2xl font-bold">{pick(locale, { mn: "Кореа руу хийх аяллаа эхлэхэд бэлэн үү?", en: "Ready to start your journey to Korea?", ko: "한국으로 가는 여정을 시작할 준비가 되셨나요?" })}</h2>
+        <p className="mb-6 text-sm text-blue-100">{t.ctaText}</p>
         <div className="flex flex-wrap justify-center gap-4">
-          <Link href="/jobs" className="bg-white text-blue-700 font-semibold px-6 py-3 rounded-xl hover:bg-blue-50 transition">
-            Browse Jobs
+          <Link href="/jobs" className="rounded-xl bg-white px-6 py-3 font-semibold text-blue-700 transition hover:bg-blue-50">
+            {t.ctaBrowseJobs}
           </Link>
-          <Link href="/contact" className="border border-white text-white font-semibold px-6 py-3 rounded-xl hover:bg-blue-600 transition">
-            Contact Support
+          <Link href="/contact" className="rounded-xl border border-white px-6 py-3 font-semibold text-white transition hover:bg-blue-600">
+            {t.ctaContact}
           </Link>
         </div>
       </section>

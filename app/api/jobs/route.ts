@@ -35,13 +35,16 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   const user = await getUser();
-  if (!user || (user.role !== "EMPLOYER" && user.role !== "ADMIN")) {
+  if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   const data = await req.json();
-  const company = await prisma.company.findUnique({ where: { userId: user.id } });
-  if (!company) return NextResponse.json({ error: "Company profile required" }, { status: 400 });
+  const company = await prisma.company.upsert({
+    where: { userId: user.id },
+    update: {},
+    create: { name: user.name, userId: user.id },
+  });
 
   const job = await prisma.job.create({
     data: {
@@ -54,8 +57,9 @@ export async function POST(req: NextRequest) {
       location: data.location,
       type: data.type || "FULL_TIME",
       category: data.category,
+      contactPhone: data.contactPhone || null,
       companyId: company.id,
-      status: user.role === "ADMIN" ? "APPROVED" : "PENDING",
+      status: "APPROVED",
     },
   });
 

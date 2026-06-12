@@ -4,7 +4,7 @@ import { getUser } from "@/lib/auth";
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const user = await getUser();
-  if (!user || (user.role !== "EMPLOYER" && user.role !== "ADMIN")) {
+  if (!user) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
