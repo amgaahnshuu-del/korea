@@ -198,6 +198,24 @@ export default function DashboardPage() {
   return (
     <div className="flex min-h-screen flex-col bg-gray-50">
       <Navbar />
+
+      {/* Mobile tab navigation */}
+      <div className="sticky top-16 z-10 border-b border-gray-200 bg-white md:hidden">
+        <div className="flex gap-1 overflow-x-auto px-3 py-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          {sidebarItems.map((item) => (
+            <button
+              key={item.id}
+              onClick={() => { setTab(item.id); if (item.id === "notifications") loadNotifs(); }}
+              className={`flex shrink-0 items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-medium transition ${tab === item.id ? "bg-blue-600 text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"}`}
+            >
+              {item.icon}
+              <span>{item.label}</span>
+              {item.badge ? <span className="flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white">{item.badge}</span> : null}
+            </button>
+          ))}
+        </div>
+      </div>
+
       <div className="mx-auto flex w-full max-w-7xl gap-6 px-4 py-8">
 
         {/* Sidebar */}
@@ -235,7 +253,7 @@ export default function DashboardPage() {
         </aside>
 
         {/* Main */}
-        <main className="flex-1 min-w-0">
+        <main className="min-w-0 flex-1">
 
           {/* ── Profile ── */}
           {tab === "cv" && (
@@ -343,11 +361,13 @@ export default function DashboardPage() {
               ) : (
                 <div className="space-y-3">
                   {savedJobs.map((fav) => (
-                    <div key={fav.id} className="flex items-center gap-4 rounded-xl border border-gray-200 p-4 hover:border-blue-200">
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-100 font-bold text-blue-700">{fav.job.company.name.charAt(0)}</div>
-                      <div className="flex-1 min-w-0">
-                        <Link href={`/jobs/${fav.job.id}`} className="font-semibold text-gray-900 hover:text-blue-700 truncate block">{fav.job.title}</Link>
-                        <p className="text-xs text-gray-500 flex items-center gap-1"><MapPin size={11} />{fav.job.location} · {fav.job.company.name}</p>
+                    <div key={fav.id} className="flex flex-col gap-3 rounded-xl border border-gray-200 p-4 hover:border-blue-200 sm:flex-row sm:items-center">
+                      <div className="flex items-center gap-3 min-w-0 flex-1">
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-100 font-bold text-blue-700">{fav.job.company.name.charAt(0)}</div>
+                        <div className="min-w-0 flex-1">
+                          <Link href={`/jobs/${fav.job.id}`} className="font-semibold text-gray-900 hover:text-blue-700 truncate block">{fav.job.title}</Link>
+                          <p className="text-xs text-gray-500 flex items-center gap-1"><MapPin size={11} />{fav.job.location} · {fav.job.company.name}</p>
+                        </div>
                       </div>
                       <div className="flex items-center gap-2 shrink-0">
                         <Link href={`/jobs/${fav.job.id}`} className="rounded-lg bg-blue-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-blue-800 inline-flex items-center gap-1">{pick(locale, { mn: "Харах", en: "View", ko: "보기" })} <ArrowRight size={11} /></Link>

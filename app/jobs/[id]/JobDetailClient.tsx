@@ -170,19 +170,19 @@ export default function JobDetailClient() {
         {/* Left column */}
         <div className="flex-1">
           {/* Header card */}
-          <div className="mb-6 rounded-2xl border border-gray-200 bg-white p-6">
-            <div className="flex items-start gap-4">
-              <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-blue-100 text-2xl font-bold text-blue-700">{job.company.name.charAt(0)}</div>
-              <div className="flex-1">
-                <div className="mb-1 flex flex-wrap items-center gap-2">
+          <div className="mb-6 rounded-2xl border border-gray-200 bg-white p-4 sm:p-6">
+            <div className="flex items-start gap-3 sm:gap-4">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-blue-100 text-xl font-bold text-blue-700 sm:h-16 sm:w-16 sm:text-2xl">{job.company.name.charAt(0)}</div>
+              <div className="min-w-0 flex-1">
+                <div className="mb-1 flex flex-wrap items-center gap-1.5">
                   <span className={`rounded-full px-2 py-1 text-xs font-medium ${JOB_TYPE_COLORS[job.type]}`}>{getJobTypeLabel(locale, job.type)}</span>
                   <span className="rounded-full bg-gray-100 px-2 py-1 text-xs text-gray-600">{getCategoryLabel(locale, job.category)}</span>
                   {job.company.verified && <span className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2 py-1 text-xs text-blue-600"><BadgeCheck size={12} /> {labels.verified}</span>}
                   {expired && <span className="inline-flex items-center gap-1 rounded-full bg-red-100 px-2 py-1 text-xs font-medium text-red-600"><Clock size={12} />{pick(locale, { mn: "Дуусгавар", en: "Expired", ko: "만료됨" })}</span>}
                 </div>
-                <h1 className="mt-2 text-2xl font-bold text-gray-900">{job.title}</h1>
-                <p className="mt-1 text-gray-500">{job.company.name} · {job.location}</p>
-                <div className="mt-5 grid grid-cols-2 gap-4">
+                <h1 className="mt-2 text-xl font-bold text-gray-900 sm:text-2xl">{job.title}</h1>
+                <p className="mt-1 text-sm text-gray-500 sm:text-base">{job.company.name} · {job.location}</p>
+                <div className="mt-4 grid grid-cols-2 gap-3 sm:mt-5 sm:gap-4">
                   <div className="rounded-xl bg-gray-50 p-3 text-center">
                     <div className="text-sm font-bold text-blue-700">{formatSalary(locale, job.salaryMin, job.salaryMax) || pick(locale, { mn: "Тохиролцоно", en: "Negotiable", ko: "협의" })}</div>
                     <div className="mt-1 text-xs text-gray-400">{labels.monthlySalary}</div>

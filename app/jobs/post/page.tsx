@@ -653,7 +653,7 @@ export default function PostJobPage() {
               <div className="space-y-3">
                 {jobs.map((job) => (
                   <article key={job.id} className="rounded-2xl border border-gray-200 p-4 transition hover:border-blue-200 hover:shadow-sm">
-                    <div className="flex items-start justify-between gap-3">
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                       <div className="min-w-0 flex-1">
                         <div className="flex flex-wrap items-center gap-2">
                           <Link href={`/jobs/${job.id}`} className="truncate font-semibold text-gray-900 hover:text-blue-700">
@@ -671,7 +671,7 @@ export default function PostJobPage() {
                         </p>
                       </div>
 
-                      <div className="flex shrink-0 items-center gap-2">
+                      <div className="flex flex-wrap items-center gap-2 sm:shrink-0">
                         <Link
                           href={`/jobs/${job.id}`}
                           className="rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-50"

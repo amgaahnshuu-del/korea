@@ -59,7 +59,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
   return (
     <html lang={locale}>
-      <body className={`${inter.className} min-h-screen bg-white text-gray-900`}>
+      <body className={`${inter.className} min-h-screen overflow-x-hidden bg-white text-gray-900`}>
         <LanguageProvider initialLocale={locale}>{children}</LanguageProvider>
       </body>
     </html>

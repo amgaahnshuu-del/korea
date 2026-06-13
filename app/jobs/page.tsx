@@ -151,7 +151,7 @@ export default function JobsPage() {
               </button>
               <button onClick={() => setView("list")} className={`rounded-lg border p-2 ${view === "list" ? "border-blue-700 bg-blue-700 text-white" : "border-gray-200 text-gray-500 hover:bg-gray-100"}`}><List size={16} /></button>
               <button onClick={() => setView("grid")} className={`rounded-lg border p-2 ${view === "grid" ? "border-blue-700 bg-blue-700 text-white" : "border-gray-200 text-gray-500 hover:bg-gray-100"}`}><LayoutGrid size={16} /></button>
-              <select value={type} onChange={(e) => { setType(e.target.value); setPage(1); }} className="rounded-xl border border-gray-200 px-3 py-2 text-sm outline-none">
+              <select value={type} onChange={(e) => { setType(e.target.value); setPage(1); }} className="rounded-xl border border-gray-200 px-3 py-2 text-sm outline-none max-w-36">
                 <option value="">{t.allTypes}</option>
                 {JOB_TYPES.map((jt) => <option key={jt} value={jt}>{getJobTypeLabel(locale, jt)}</option>)}
               </select>

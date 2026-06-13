@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { LayoutDashboard, Users, Briefcase, LogOut, Flag, CheckCircle, XCircle, Trash2, ShieldOff, ShieldCheck } from "lucide-react";
+import { LayoutDashboard, Users, Briefcase, LogOut, Flag, CheckCircle, XCircle, Trash2, ShieldOff, ShieldCheck, Menu, X } from "lucide-react";
 import { formatDate, getJobStatusLabel, getTranslation, pick } from "@/lib/i18n";
 import { useLanguage } from "@/components/LanguageProvider";
 
@@ -104,6 +104,7 @@ export default function AdminPage() {
   const [deleting, setDeleting] = useState<string | null>(null);
   const [blockingUserId, setBlockingUserId] = useState<string | null>(null);
   const [previewJob, setPreviewJob] = useState<AllJob | null>(null);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     fetch("/api/auth/me")
@@ -262,17 +263,27 @@ export default function AdminPage() {
 
   return (
     <div className="flex min-h-screen bg-gray-50">
-      <aside className="flex w-56 shrink-0 flex-col border-r border-gray-200 bg-white">
-        <div className="border-b border-gray-100 p-5">
-          <Link href="/" className="text-lg font-bold text-blue-800">Ajil Korea</Link>
-          <p className="mt-0.5 text-xs text-gray-400">{t.dashboard}</p>
+      {/* Mobile overlay */}
+      {sidebarOpen && (
+        <div className="fixed inset-0 z-40 bg-black/50 lg:hidden" onClick={() => setSidebarOpen(false)} />
+      )}
+
+      <aside className={`fixed inset-y-0 left-0 z-50 flex w-64 shrink-0 flex-col border-r border-gray-200 bg-white transition-transform duration-200 lg:static lg:z-auto lg:w-56 lg:translate-x-0 ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}`}>
+        <div className="flex items-center justify-between border-b border-gray-100 p-5">
+          <div>
+            <Link href="/" className="text-lg font-bold text-blue-800">Ajil Korea</Link>
+            <p className="mt-0.5 text-xs text-gray-400">{t.dashboard}</p>
+          </div>
+          <button onClick={() => setSidebarOpen(false)} className="rounded-lg p-1 text-gray-400 hover:bg-gray-100 lg:hidden">
+            <X size={18} />
+          </button>
         </div>
 
         <nav className="flex-1 p-3 space-y-1">
           {menuItems.map((item) => (
             <button
               key={item.id}
-              onClick={() => setTab(item.id)}
+              onClick={() => { setTab(item.id); setSidebarOpen(false); }}
               className={`w-full flex items-center gap-2 rounded-xl px-3 py-2.5 text-left text-sm transition ${tab === item.id ? "bg-blue-50 font-semibold text-blue-700" : "text-gray-600 hover:bg-gray-50"}`}
             >
               <span>{item.icon}</span>
@@ -300,9 +311,14 @@ export default function AdminPage() {
         </div>
       </aside>
 
-      <div className="flex flex-1 flex-col">
-        <header className="flex items-center justify-between border-b border-gray-200 bg-white px-6 py-4">
-          <h1 className="text-lg font-bold text-gray-900">{menuItems.find((m) => m.id === tab)?.label}</h1>
+      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
+        <header className="flex items-center justify-between border-b border-gray-200 bg-white px-4 py-4 lg:px-6">
+          <div className="flex items-center gap-3">
+            <button onClick={() => setSidebarOpen(true)} className="rounded-lg p-1.5 text-gray-600 hover:bg-gray-100 lg:hidden">
+              <Menu size={20} />
+            </button>
+            <h1 className="text-lg font-bold text-gray-900">{menuItems.find((m) => m.id === tab)?.label}</h1>
+          </div>
           <div className="flex items-center gap-3">
             <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-600 text-sm font-bold text-white">A</div>
             <div>
@@ -317,7 +333,7 @@ export default function AdminPage() {
           {/* ── Dashboard ── */}
           {tab === "dashboard" && stats && (
             <div>
-              <div className="mb-6 grid grid-cols-2 gap-4 lg:grid-cols-3">
+              <div className="mb-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
                 {[
                   {
                     label: pick(locale, { mn: "Нийт зар", en: "Total Jobs", ko: "전체 공고" }),
@@ -390,7 +406,7 @@ export default function AdminPage() {
                   {pick(locale, { mn: "Хянагдах зарууд", en: "Pending Review", ko: "승인 대기 공고" })}
                 </h2>
                 <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
+                  <table className="w-full min-w-[600px] text-sm">
                     <thead>
                       <tr className="border-b border-gray-100 text-xs text-gray-500">
                         <th className="pb-3 font-medium text-left">{t.company}</th>
@@ -408,7 +424,7 @@ export default function AdminPage() {
                               <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-blue-100 text-xs font-bold text-blue-700">
                                 {job.company.name.charAt(0)}
                               </div>
-                              <span className="max-w-[100px] truncate text-xs text-gray-600">{job.company.name}</span>
+                              <span className="max-w-25 truncate text-xs text-gray-600">{job.company.name}</span>
                             </div>
                           </td>
                           <td className="max-w-xs py-3">
@@ -481,7 +497,7 @@ export default function AdminPage() {
                 </span>
               </div>
               <div className="overflow-x-auto">
-                <table className="w-full text-sm">
+                <table className="w-full min-w-[600px] text-sm">
                   <thead>
                     <tr className="border-b border-gray-100 text-xs text-gray-500">
                       <th className="pb-3 font-medium text-left">{pick(locale, { mn: "Нэр", en: "Name", ko: "이름" })}</th>
@@ -544,7 +560,7 @@ export default function AdminPage() {
                 <span className="text-xs text-gray-400">{allJobs.length} {t.jobs}</span>
               </div>
               <div className="overflow-x-auto">
-                <table className="w-full text-sm">
+                <table className="w-full min-w-[600px] text-sm">
                   <thead>
                     <tr className="border-b border-gray-100 text-xs text-gray-500">
                       <th className="pb-3 font-medium text-left">{t.title}</th>
@@ -647,7 +663,7 @@ export default function AdminPage() {
                 </span>
               </div>
               <div className="overflow-x-auto">
-                <table className="w-full text-sm">
+                <table className="w-full min-w-[600px] text-sm">
                   <thead>
                     <tr className="border-b border-gray-100 text-xs text-gray-500">
                       <th className="pb-3 font-medium text-left">{pick(locale, { mn: "Зар", en: "Job", ko: "공고" })}</th>
@@ -743,7 +759,7 @@ export default function AdminPage() {
                 </span>
               </div>
               <div className="overflow-x-auto">
-                <table className="w-full text-sm">
+                <table className="w-full min-w-[600px] text-sm">
                   <thead>
                     <tr className="border-b border-gray-100 text-xs text-gray-500">
                       <th className="pb-3 font-medium text-left">{pick(locale, { mn: "Гомдол гаргагч", en: "Reported by", ko: "신고자" })}</th>
@@ -841,10 +857,10 @@ export default function AdminPage() {
 
       {/* ── Job Preview Modal ── */}
       {previewJob && (
-        <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/50 p-6">
-          <div className="w-full max-w-2xl rounded-2xl bg-white shadow-2xl my-8">
+        <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/50 p-4 sm:p-6">
+          <div className="my-4 w-full max-w-2xl rounded-2xl bg-white shadow-2xl sm:my-8">
             {/* Header */}
-            <div className="flex items-start justify-between border-b border-gray-100 px-6 py-5">
+            <div className="flex items-start justify-between border-b border-gray-100 px-4 py-4 sm:px-6 sm:py-5">
               <div>
                 <div className="mb-1.5 flex items-center gap-2">
                   <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_COLORS[previewJob.status]}`}>
@@ -864,7 +880,7 @@ export default function AdminPage() {
               </button>
             </div>
 
-            <div className="px-6 py-5 space-y-5">
+            <div className="space-y-5 px-4 py-4 sm:px-6 sm:py-5">
               {/* Meta chips */}
               <div className="flex flex-wrap gap-2 text-xs">
                 <span className="rounded-full border border-gray-200 bg-gray-50 px-3 py-1">{previewJob.type}</span>
@@ -924,9 +940,9 @@ export default function AdminPage() {
             </div>
 
             {/* Footer actions */}
-            <div className="flex items-center justify-between border-t border-gray-100 px-6 py-4">
+            <div className="flex flex-col gap-3 border-t border-gray-100 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
               <p className="text-xs text-gray-400">{formatDate(locale, previewJob.createdAt)}</p>
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
                 {(previewJob.status === "PENDING" || previewJob.status === "REJECTED" || previewJob.status === "EXPIRED") && (
                   <button
                     onClick={async () => { await updateJobStatus(previewJob.id, "APPROVED"); setPreviewJob(null); }}

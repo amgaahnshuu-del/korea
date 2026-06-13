@@ -253,17 +253,17 @@ export default async function Home() {
                 })}
               </p>
 
-              <div className="mb-8 flex flex-wrap gap-4">
+              <div className="mb-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
                 <Link
                   href="/jobs"
-                  className="rounded-xl bg-white px-7 py-4 font-semibold text-blue-700 transition hover:bg-gray-100"
+                  className="rounded-xl bg-white px-7 py-4 text-center font-semibold text-blue-700 transition hover:bg-gray-100"
                 >
                   {pick(locale, { mn: "Ажлын заруудыг үзэх", en: "Browse Jobs", ko: "채용 공고 보기" })}
                 </Link>
 
                 <Link
                   href="/register"
-                  className="rounded-xl border border-blue-400 px-7 py-4 font-medium text-white transition hover:bg-blue-600"
+                  className="rounded-xl border border-blue-400 px-7 py-4 text-center font-medium text-white transition hover:bg-blue-600"
                 >
                   {pick(locale, { mn: "Үнэгүй бүртгүүлэх", en: "Create Account", ko: "무료 회원가입" })}
                 </Link>
