@@ -2,9 +2,19 @@ import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { signToken } from "@/lib/jwt";
+import { checkRateLimit, resetRateLimit } from "@/lib/rate-limit";
 
 export async function POST(req: NextRequest) {
   try {
+    const ip = req.headers.get("x-forwarded-for") ?? req.headers.get("x-real-ip") ?? "unknown";
+    const { allowed, retryAfter } = checkRateLimit(`login:${ip}`);
+    if (!allowed) {
+      return NextResponse.json(
+        { error: `Хэт олон оролдлого. ${retryAfter} секундын дараа дахин оролдоно уу.` },
+        { status: 429, headers: { "Retry-After": String(retryAfter) } }
+      );
+    }
+
     const { email, password } = await req.json();
 
     const user = await prisma.user.findUnique({ where: { email } });
@@ -16,6 +26,12 @@ export async function POST(req: NextRequest) {
     if (!valid) {
       return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
     }
+
+    if (user.isBlocked) {
+      return NextResponse.json({ error: "BLOCKED" }, { status: 403 });
+    }
+
+    resetRateLimit(`login:${ip}`);
 
     const token = signToken({ id: user.id, email: user.email, role: user.role, name: user.name });
 

@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Briefcase, X, RefreshCw, CheckCircle2, Zap, FileText, Mail, Phone, ChevronDown, ChevronUp } from "lucide-react";
+import { Briefcase, X, RefreshCw, CheckCircle2, Zap, FileText, Mail, Phone, AlertTriangle } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import { formatDate, getCategoryLabel, getJobStatusLabel, getJobTypeLabel, getTranslation, pick } from "@/lib/i18n";
 import { useLanguage } from "@/components/LanguageProvider";
@@ -22,9 +22,10 @@ const CATEGORY_KEYS = [
 const JOB_TYPES = ["FULL_TIME", "PART_TIME", "CONTRACT", "INTERNSHIP"];
 
 const JOB_STATUS_COLORS: Record<string, string> = {
-  PENDING: "bg-yellow-100 text-yellow-700",
+  PENDING:  "bg-yellow-100 text-yellow-700",
   APPROVED: "bg-green-100 text-green-700",
   REJECTED: "bg-red-100 text-red-700",
+  EXPIRED:  "bg-gray-100 text-gray-500",
 };
 
 type JobForm = {
@@ -38,6 +39,9 @@ type JobForm = {
   type: string;
   category: string;
   contactPhone: string;
+  recruiterName: string;
+  phoneNumber: string;
+  kakaoId: string;
 };
 
 interface ReceivedApp {
@@ -71,6 +75,9 @@ const createEmptyForm = (): JobForm => ({
   type: "FULL_TIME",
   category: "Manufacturing",
   contactPhone: "",
+  recruiterName: "",
+  phoneNumber: "",
+  kakaoId: "",
 });
 
 export default function PostJobPage() {
@@ -87,7 +94,14 @@ export default function PostJobPage() {
   const [jobs, setJobs] = useState<PostedJob[]>([]);
   const [form, setForm] = useState<JobForm>(createEmptyForm);
   const [apps, setApps] = useState<ReceivedApp[]>([]);
-  const [expandedApp, setExpandedApp] = useState<string | null>(null);
+  const [selectedApp, setSelectedApp] = useState<ReceivedApp | null>(null);
+  const [deletingAppId, setDeletingAppId] = useState<string | null>(null);
+  // Report user state
+  const [reportingUserId, setReportingUserId] = useState<string | null>(null);
+  const [reportReason, setReportReason] = useState("");
+  const [reportDesc, setReportDesc] = useState("");
+  const [reportSubmitting, setReportSubmitting] = useState(false);
+  const [reportDone, setReportDone] = useState(false);
 
   // QPay modal state
   const [qpayModal, setQpayModal] = useState(false);
@@ -137,12 +151,17 @@ export default function PostJobPage() {
 
         setCanManageJobs(true);
 
-        const jobsRes = await fetch("/api/recruiter/jobs");
+        const [jobsRes, appsRes] = await Promise.all([
+          fetch("/api/recruiter/jobs"),
+          fetch("/api/recruiter/applications"),
+        ]);
         const jobsData = await jobsRes.json();
+        const appsData = await appsRes.json();
 
         if (!alive) return;
 
         setJobs(jobsData.jobs || []);
+        setApps(appsData.applications || []);
       } catch {
         if (!alive) return;
         setError(pick(locale, { mn: "Ажлын байр удирдах цонхыг ачаалж чадсангүй.", en: "Unable to load your posting workspace.", ko: "공고 작업 공간을 불러오지 못했습니다." }));
@@ -243,6 +262,32 @@ export default function PostJobPage() {
     }
     setQpayChecking(false);
     setQpayPaid(true);
+  };
+
+  const deleteApp = async (appId: string) => {
+    setDeletingAppId(appId);
+    await fetch(`/api/recruiter/applications/${appId}`, { method: "DELETE" });
+    setApps((prev) => prev.filter((a) => a.id !== appId));
+    if (selectedApp?.id === appId) setSelectedApp(null);
+    setDeletingAppId(null);
+  };
+
+  const submitUserReport = async () => {
+    if (!reportReason || !selectedApp) return;
+    setReportSubmitting(true);
+    await fetch(`/api/recruiter/applications/${selectedApp.id}/report-user`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ reason: reportReason, description: reportDesc }),
+    });
+    setReportSubmitting(false);
+    setReportDone(true);
+    setTimeout(() => {
+      setReportingUserId(null);
+      setReportDone(false);
+      setReportReason("");
+      setReportDesc("");
+    }, 2000);
   };
 
   const deleteJob = async (jobId: string) => {
@@ -385,6 +430,42 @@ export default function PostJobPage() {
                 />
               </div>
 
+              <div className="grid gap-4 md:grid-cols-3">
+                <div>
+                  <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500">
+                    {pick(locale, { mn: "Ажил олгогчийн нэр", en: "Recruiter Name", ko: "담당자 이름" })}
+                  </label>
+                  <input
+                    value={form.recruiterName}
+                    onChange={(e) => updateField("recruiterName", e.target.value)}
+                    placeholder={pick(locale, { mn: "Жишээ: Батбаяр", en: "e.g. John Kim", ko: "예: 김철수" })}
+                    className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm outline-none transition focus:border-blue-400"
+                  />
+                </div>
+                <div>
+                  <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500">
+                    {pick(locale, { mn: "Утасны дугаар", en: "Phone Number", ko: "전화번호" })}
+                  </label>
+                  <input
+                    value={form.phoneNumber}
+                    onChange={(e) => updateField("phoneNumber", e.target.value)}
+                    placeholder="+82 10-0000-0000"
+                    className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm outline-none transition focus:border-blue-400"
+                  />
+                </div>
+                <div>
+                  <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500">
+                    KakaoTalk ID
+                  </label>
+                  <input
+                    value={form.kakaoId}
+                    onChange={(e) => updateField("kakaoId", e.target.value)}
+                    placeholder={pick(locale, { mn: "Kakao ID", en: "Kakao ID", ko: "카카오톡 ID" })}
+                    className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm outline-none transition focus:border-blue-400"
+                  />
+                </div>
+              </div>
+
               <div className="grid gap-4 md:grid-cols-2">
                 <div>
                   <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500">
@@ -522,11 +603,14 @@ export default function PostJobPage() {
               ) : (
                 <div className="max-h-72 space-y-2 overflow-y-auto pr-1">
                   {apps.map((app) => (
-                    <div key={app.id} className="rounded-xl border border-gray-200 bg-gray-50 overflow-hidden">
+                    <div
+                      key={app.id}
+                      className="flex w-full items-center gap-3 rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 transition hover:border-blue-200 hover:bg-blue-50"
+                    >
                       <button
                         type="button"
-                        onClick={() => setExpandedApp(expandedApp === app.id ? null : app.id)}
-                        className="flex w-full items-center gap-3 px-4 py-3 text-left hover:bg-gray-100 transition"
+                        onClick={() => setSelectedApp(app)}
+                        className="flex min-w-0 flex-1 items-center gap-3 text-left"
                       >
                         <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-blue-600 text-xs font-bold text-white">
                           {app.user.name.charAt(0).toUpperCase()}
@@ -535,29 +619,17 @@ export default function PostJobPage() {
                           <p className="truncate text-sm font-semibold text-gray-900">{app.user.name}</p>
                           <p className="truncate text-xs text-gray-400">{app.job.title}</p>
                         </div>
-                        <div className="flex items-center gap-2 shrink-0">
-                          <span className="text-xs text-gray-400">{new Date(app.createdAt).toLocaleDateString()}</span>
-                          {expandedApp === app.id ? <ChevronUp size={14} className="text-gray-400" /> : <ChevronDown size={14} className="text-gray-400" />}
-                        </div>
+                        <span className="shrink-0 text-xs text-gray-400">{new Date(app.createdAt).toLocaleDateString()}</span>
                       </button>
-
-                      {expandedApp === app.id && (
-                        <div className="border-t border-gray-200 bg-white px-4 py-3">
-                          <div className="mb-3 flex flex-wrap gap-3 text-xs text-gray-500">
-                            <span className="flex items-center gap-1"><Mail size={11} />{app.user.email}</span>
-                            {app.user.phone && <span className="flex items-center gap-1"><Phone size={11} />{app.user.phone}</span>}
-                          </div>
-                          {(app.message || app.user.cvText) ? (
-                            <pre className="max-h-48 overflow-y-auto whitespace-pre-wrap rounded-lg bg-gray-50 p-3 text-xs leading-relaxed text-gray-700 font-sans">
-                              {app.message || app.user.cvText}
-                            </pre>
-                          ) : (
-                            <p className="text-xs text-gray-400 italic">
-                              {pick(locale, { mn: "CV бичигдээгүй байна", en: "No CV provided", ko: "CV 없음" })}
-                            </p>
-                          )}
-                        </div>
-                      )}
+                      <button
+                        type="button"
+                        onClick={() => deleteApp(app.id)}
+                        disabled={deletingAppId === app.id}
+                        className="ml-1 shrink-0 rounded-lg p-1.5 text-gray-300 transition hover:bg-red-50 hover:text-red-400 disabled:opacity-40"
+                        title={pick(locale, { mn: "Устгах", en: "Delete", ko: "삭제" })}
+                      >
+                        {deletingAppId === app.id ? <RefreshCw size={13} className="animate-spin" /> : <X size={13} />}
+                      </button>
                     </div>
                   ))}
                 </div>
@@ -636,6 +708,101 @@ export default function PostJobPage() {
           </section>
         </div>
       </main>
+
+      {/* ── CV Detail Modal ── */}
+      {selectedApp && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-lg rounded-2xl bg-white shadow-xl">
+            {/* Header */}
+            <div className="flex items-center justify-between border-b border-gray-100 px-5 py-4">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-600 text-sm font-bold text-white">
+                  {selectedApp.user.name.charAt(0).toUpperCase()}
+                </div>
+                <div>
+                  <p className="font-semibold text-gray-900">{selectedApp.user.name}</p>
+                  <p className="text-xs text-gray-400">{selectedApp.job.title}</p>
+                </div>
+              </div>
+              <button onClick={() => { setSelectedApp(null); setReportingUserId(null); setReportDone(false); setReportReason(""); setReportDesc(""); }}>
+                <X size={18} className="text-gray-400 hover:text-gray-600" />
+              </button>
+            </div>
+
+            <div className="p-5">
+              {/* Contact info */}
+              <div className="mb-4 flex flex-wrap gap-4 rounded-xl bg-gray-50 px-4 py-3 text-sm text-gray-600">
+                <span className="flex items-center gap-1.5"><Mail size={13} className="text-gray-400" />{selectedApp.user.email}</span>
+                {selectedApp.user.phone && <span className="flex items-center gap-1.5"><Phone size={13} className="text-gray-400" />{selectedApp.user.phone}</span>}
+              </div>
+
+              {/* CV content */}
+              {(selectedApp.message || selectedApp.user.cvText) ? (
+                <pre className="max-h-64 overflow-y-auto whitespace-pre-wrap rounded-xl border border-gray-200 bg-gray-50 p-4 font-sans text-xs leading-relaxed text-gray-700">
+                  {selectedApp.message || selectedApp.user.cvText}
+                </pre>
+              ) : (
+                <div className="flex h-24 items-center justify-center rounded-xl border border-dashed border-gray-200 text-sm text-gray-400">
+                  {pick(locale, { mn: "CV бичигдээгүй байна", en: "No CV provided", ko: "CV 없음" })}
+                </div>
+              )}
+
+              {/* Report user section */}
+              {reportingUserId === selectedApp.id ? (
+                <div className="mt-4 rounded-xl border border-red-100 bg-red-50 p-4">
+                  {reportDone ? (
+                    <div className="flex items-center gap-2 text-sm font-semibold text-green-700">
+                      <CheckCircle2 size={16} /> {pick(locale, { mn: "Гомдол илгээгдлээ", en: "Report submitted", ko: "신고 접수됨" })}
+                    </div>
+                  ) : (
+                    <>
+                      <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-red-600">
+                        {pick(locale, { mn: "Хэрэглэгчид гомдол гаргах", en: "Report User", ko: "사용자 신고" })}
+                      </p>
+                      <div className="mb-3 space-y-1.5">
+                        {[
+                          { value: "Spam",         mn: "Спам / Хуурамч",        en: "Spam / Fake",          ko: "스팸 / 허위" },
+                          { value: "Inappropriate", mn: "Зохисгүй агуулга",     en: "Inappropriate content", ko: "부적절한 내용" },
+                          { value: "Fraud",         mn: "Луйвар оролдлого",     en: "Fraud attempt",         ko: "사기 시도" },
+                          { value: "Other",         mn: "Бусад",                en: "Other",                 ko: "기타" },
+                        ].map((r) => (
+                          <label key={r.value} className="flex cursor-pointer items-center gap-2 text-sm">
+                            <input type="radio" name="userReportReason" value={r.value} checked={reportReason === r.value} onChange={() => setReportReason(r.value)} />
+                            {pick(locale, { mn: r.mn, en: r.en, ko: r.ko })}
+                          </label>
+                        ))}
+                      </div>
+                      <textarea
+                        value={reportDesc}
+                        onChange={(e) => setReportDesc(e.target.value)}
+                        rows={2}
+                        placeholder={pick(locale, { mn: "Нэмэлт тайлбар (заавал биш)", en: "Additional notes (optional)", ko: "추가 설명 (선택)" })}
+                        className="mb-3 w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs outline-none focus:border-red-300"
+                      />
+                      <div className="flex gap-2">
+                        <button onClick={() => setReportingUserId(null)} className="flex-1 rounded-lg border border-gray-200 py-2 text-xs font-semibold hover:bg-white">
+                          {pick(locale, { mn: "Цуцлах", en: "Cancel", ko: "취소" })}
+                        </button>
+                        <button onClick={submitUserReport} disabled={!reportReason || reportSubmitting} className="flex-1 rounded-lg bg-red-600 py-2 text-xs font-semibold text-white hover:bg-red-700 disabled:opacity-60">
+                          {reportSubmitting ? "..." : pick(locale, { mn: "Илгээх", en: "Submit", ko: "제출" })}
+                        </button>
+                      </div>
+                    </>
+                  )}
+                </div>
+              ) : (
+                <button
+                  onClick={() => setReportingUserId(selectedApp.id)}
+                  className="mt-4 flex items-center gap-1.5 text-xs text-gray-400 hover:text-red-500 transition"
+                >
+                  <AlertTriangle size={12} />
+                  {pick(locale, { mn: "Энэ хэрэглэгчид гомдол гаргах", en: "Report this user", ko: "이 사용자 신고" })}
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ── QPay Modal ── */}
       {qpayModal && (

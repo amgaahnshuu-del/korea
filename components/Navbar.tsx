@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { ChevronDown, LayoutDashboard, LogOut, ShieldCheck } from "lucide-react";
 import { pick } from "@/lib/i18n";
 import { useLanguage } from "@/components/LanguageProvider";
 
@@ -16,7 +17,10 @@ interface User {
 
 export default function Navbar() {
   const [user, setUser] = useState<User | null>(null);
+  const [authLoading, setAuthLoading] = useState(true);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const { locale } = useLanguage();
   const homeHref = user ? "/jobs" : "/";
@@ -45,8 +49,19 @@ export default function Navbar() {
   useEffect(() => {
     fetch("/api/auth/me")
       .then((r) => r.json())
-      .then((d) => setUser(d.user))
-      .catch(() => {});
+      .then((d) => setUser(d.user ?? null))
+      .catch(() => {})
+      .finally(() => setAuthLoading(false));
+  }, []);
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
   }, []);
 
   const logout = async () => {
@@ -83,18 +98,72 @@ export default function Navbar() {
           </div>
 
           <div className="hidden items-center gap-3 md:flex">
-            {user ? (
-              <>
-                <Link
-                  href={user.role === "ADMIN" ? "/admin" : "/dashboard"}
-                  className="flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-blue-700"
+            {authLoading ? (
+              <div className="h-9 w-28 animate-pulse rounded-xl bg-gray-100" />
+            ) : user ? (
+              <div className="relative" ref={dropdownRef}>
+                <button
+                  onClick={() => setDropdownOpen((o) => !o)}
+                  className={`flex items-center gap-2.5 rounded-xl border px-3 py-1.5 text-sm font-medium transition ${
+                    dropdownOpen
+                      ? "border-blue-200 bg-blue-50 text-blue-700"
+                      : "border-gray-200 bg-white text-gray-700 hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700"
+                  }`}
                 >
-                  <span className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-600 text-xs font-bold text-white">
+                  <span className="flex h-7 w-7 items-center justify-center rounded-full bg-linear-to-br from-blue-600 to-blue-800 text-xs font-bold text-white shadow-sm">
                     {user.name.charAt(0).toUpperCase()}
                   </span>
-                  {user.name}
-                </Link>
-              </>
+                  <span className="max-w-25 truncate">{user.name}</span>
+                  <ChevronDown size={14} className={`shrink-0 transition-transform ${dropdownOpen ? "rotate-180" : ""}`} />
+                </button>
+
+                {dropdownOpen && (
+                  <div className="absolute right-0 top-full mt-2 w-52 overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-lg">
+                    {/* User info header */}
+                    <div className="border-b border-gray-100 px-4 py-3">
+                      <div className="flex items-center gap-3">
+                        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-blue-600 to-blue-800 text-sm font-bold text-white">
+                          {user.name.charAt(0).toUpperCase()}
+                        </span>
+                        <div className="min-w-0">
+                          <p className="truncate text-sm font-semibold text-gray-900">{user.name}</p>
+                          <p className="truncate text-xs text-gray-400">{user.email}</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Menu items */}
+                    <div className="p-1.5">
+                      {user.role === "ADMIN" ? (
+                        <Link
+                          href="/admin"
+                          onClick={() => setDropdownOpen(false)}
+                          className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm font-medium text-gray-700 transition hover:bg-blue-50 hover:text-blue-700"
+                        >
+                          <ShieldCheck size={15} className="text-blue-600" />
+                          {text.admin}
+                        </Link>
+                      ) : (
+                        <Link
+                          href="/dashboard"
+                          onClick={() => setDropdownOpen(false)}
+                          className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm font-medium text-gray-700 transition hover:bg-blue-50 hover:text-blue-700"
+                        >
+                          <LayoutDashboard size={15} className="text-blue-600" />
+                          {text.dashboard}
+                        </Link>
+                      )}
+                      <button
+                        onClick={() => { setDropdownOpen(false); logout(); }}
+                        className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-sm font-medium text-red-500 transition hover:bg-red-50"
+                      >
+                        <LogOut size={15} />
+                        {text.logout}
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
             ) : (
               <>
                 <Link
@@ -163,7 +232,9 @@ export default function Navbar() {
           </Link>
 
           <div className="border-t border-gray-100 pt-2">
-            {user ? (
+            {authLoading ? (
+              <div className="h-8 w-32 animate-pulse rounded-xl bg-gray-100 mx-1 my-2" />
+            ) : user ? (
               <>
                 <p className="px-1 py-1.5 text-xs text-gray-400">
                   {user.name} · {text.role[user.role === "ADMIN" ? "ADMIN" : "USER"]}

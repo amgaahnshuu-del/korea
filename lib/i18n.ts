@@ -103,19 +103,22 @@ export function getJobTypeLabel(locale: Locale, type: string): string {
 export function getJobStatusLabel(locale: Locale, status: string): string {
   const labels = pick(locale, {
     mn: {
-      PENDING: "Хянагдаж буй",
+      PENDING:  "Хянагдаж буй",
       APPROVED: "Зөвшөөрсөн",
       REJECTED: "Татгалзсан",
+      EXPIRED:  "Хугацаа дууссан",
     },
     en: {
-      PENDING: "Pending",
+      PENDING:  "Pending",
       APPROVED: "Approved",
       REJECTED: "Rejected",
+      EXPIRED:  "Expired",
     },
     ko: {
-      PENDING: "대기 중",
+      PENDING:  "대기 중",
       APPROVED: "승인됨",
       REJECTED: "거부됨",
+      EXPIRED:  "만료됨",
     },
   }) as Record<string, string>;
 

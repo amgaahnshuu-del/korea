@@ -23,6 +23,7 @@ enum JobStatus {
   PENDING
   APPROVED
   REJECTED
+  EXPIRED
 }
 
 enum AppStatus {
@@ -34,18 +35,25 @@ enum AppStatus {
 }
 
 model User {
-  id           String        @id @default(cuid())
-  name         String
-  email        String        @unique
-  password     String
-  role         Role          @default(USER)
-  avatar       String?
-  phone        String?
-  cvText       String?
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
-  applications Application[]
-  company      Company?
+  id            String         @id @default(cuid())
+  name          String
+  email         String         @unique
+  password      String
+  role          Role           @default(USER)
+  avatar        String?
+  phone         String?
+  cvText        String?
+  isBlocked     Boolean        @default(false)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  applications  Application[]
+  company       Company?
+  cv            CV?
+  favorites     Favorite[]
+  reports       JobReport[]
+  notifications Notification[]
+  userReports   UserReport[]   @relation("ReportedUser")
+  reportsMade   UserReport[]   @relation("ReportingUser")
 }
 
 model Company {
@@ -65,30 +73,37 @@ model Company {
 }
 
 model Job {
-  id           String        @id @default(cuid())
-  title        String
-  description  String
-  requirements String?
-  benefits     String?
-  salaryMin    Int?
-  salaryMax    Int?
-  location     String
-  type         JobType       @default(FULL_TIME)
-  category     String
-  contactPhone String?
-  status       JobStatus     @default(PENDING)
-  featured     Boolean       @default(false)
-  views        Int           @default(0)
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
-  companyId    String
-  company      Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  applications Application[]
+  id            String        @id @default(cuid())
+  title         String
+  description   String
+  requirements  String?
+  benefits      String?
+  salaryMin     Int?
+  salaryMax     Int?
+  location      String
+  type          JobType       @default(FULL_TIME)
+  category      String
+  contactPhone  String?
+  recruiterName String?
+  phoneNumber   String?
+  kakaoId       String?
+  status        JobStatus     @default(PENDING)
+  featured      Boolean       @default(false)
+  views         Int           @default(0)
+  expiresAt     DateTime?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  companyId     String
+  company       Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  applications  Application[]
+  favorites     Favorite[]
+  reports       JobReport[]
 
   @@index([status])
   @@index([companyId])
   @@index([status, featured])
   @@index([category])
+  @@index([expiresAt])
 }
 
 model Application {
@@ -105,6 +120,80 @@ model Application {
   @@unique([userId, jobId])
   @@index([userId])
   @@index([jobId])
+  @@index([status])
+}
+
+model CV {
+  id               String   @id @default(cuid())
+  userId           String   @unique
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  fullName         String
+  phone            String?
+  email            String
+  dateOfBirth      String?
+  gender           String?
+  nationality      String?
+  education        String?
+  experience       String?
+  skills           String?
+  selfIntroduction String?
+  resumeUrl        String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+model Favorite {
+  id        String   @id @default(cuid())
+  userId    String
+  jobId     String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  job       Job      @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, jobId])
+  @@index([userId])
+}
+
+model JobReport {
+  id          String   @id @default(cuid())
+  jobId       String
+  userId      String
+  reason      String
+  description String?
+  status      String   @default("OPEN")
+  createdAt   DateTime @default(now())
+  job         Job      @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([jobId])
+  @@index([status])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  title     String
+  message   String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([userId, isRead])
+}
+
+model UserReport {
+  id             String   @id @default(cuid())
+  reportedUserId String
+  reportedBy     String
+  reason         String
+  description    String?
+  status         String   @default("OPEN")
+  createdAt      DateTime @default(now())
+  reportedUser   User     @relation("ReportedUser", fields: [reportedUserId], references: [id], onDelete: Cascade)
+  reporter       User     @relation("ReportingUser", fields: [reportedBy], references: [id], onDelete: Cascade)
+
+  @@index([reportedUserId])
   @@index([status])
 }
 

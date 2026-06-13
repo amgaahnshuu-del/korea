@@ -6,11 +6,18 @@ export async function GET() {
   const user = await getUser();
   if (!user || user.role !== "ADMIN") return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
-  const [totalJobs, totalUsers, totalApps, pendingJobs] = await Promise.all([
+  const [
+    totalJobs, approvedJobs, pendingJobs, rejectedJobs, expiredJobs,
+    totalUsers, totalApps, totalReports,
+  ] = await Promise.all([
+    prisma.job.count(),
     prisma.job.count({ where: { status: "APPROVED" } }),
+    prisma.job.count({ where: { status: "PENDING" } }),
+    prisma.job.count({ where: { status: "REJECTED" } }),
+    prisma.job.count({ where: { status: "EXPIRED" } }),
     prisma.user.count(),
     prisma.application.count(),
-    prisma.job.count({ where: { status: "PENDING" } }),
+    prisma.jobReport.count({ where: { status: "OPEN" } }),
   ]);
 
   const recentJobs = await prisma.job.findMany({
@@ -20,5 +27,9 @@ export async function GET() {
     take: 5,
   });
 
-  return NextResponse.json({ totalJobs, totalUsers, totalApps, pendingJobs, recentJobs });
+  return NextResponse.json({
+    totalJobs, approvedJobs, pendingJobs, rejectedJobs, expiredJobs,
+    totalUsers, totalApps, totalReports,
+    recentJobs,
+  });
 }

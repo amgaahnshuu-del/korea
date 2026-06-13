@@ -29,7 +29,15 @@ export default function LoginPage() {
     const data = await res.json();
     setLoading(false);
     if (!res.ok) {
-      setError(data.error || common.loginFailed);
+      if (res.status === 403 && data.error === "BLOCKED") {
+        setError(pick(locale, {
+          mn: "Таны бүртгэл блоклогдсон байна. Дэлгэрэнгүй мэдээлэл авахыг хүсвэл холбоо барина уу.",
+          en: "Your account has been blocked by an administrator. Please contact support.",
+          ko: "관리자에 의해 계정이 차단되었습니다. 고객센터에 문의하세요.",
+        }));
+      } else {
+        setError(data.error || common.loginFailed);
+      }
       return;
     }
     const role = data.user?.role;
