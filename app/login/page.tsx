@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Eye, EyeOff, MessageCircle, CheckCircle2 } from "lucide-react";
+import { Eye, EyeOff, CheckCircle2 } from "lucide-react";
 import { getTranslation, pick } from "@/lib/i18n";
 import { useLanguage } from "@/components/LanguageProvider";
 
@@ -86,14 +86,14 @@ export default function LoginPage() {
 
         {/* Center content */}
         <div className="relative z-10">
-          <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3.5 py-1.5 text-xs font-medium">
-            <span className="text-white/90">KR MN</span>
-            <span className="text-white/55">
+          <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-medium">
+            <span className="rounded-full bg-white/20 px-2 py-0.5 text-white text-[10px] font-semibold tracking-wide">KR · MN</span>
+            <span className="text-white/60">
               {pick(locale, { mn: "150,000+ хэрэглэгч итгэдэг", en: "Trusted by 150,000+ users", ko: "150,000+ 사용자 신뢰" })}
             </span>
           </div>
 
-          <h2 className="mb-4 text-4xl font-extrabold leading-tight tracking-tight">
+          <h2 className="mb-5 whitespace-pre-line text-3xl font-extrabold leading-snug tracking-tight">
             {pick(locale, {
               mn: "Таны ирээдүй\nСолонгосоос эхэлнэ",
               en: "Your Future in Korea\nStarts Here",
@@ -101,7 +101,7 @@ export default function LoginPage() {
             })}
           </h2>
 
-          <p className="mb-8 max-w-sm text-sm leading-relaxed text-white/60">
+          <p className="mb-8 max-w-xs text-sm leading-relaxed text-white/55">
             {pick(locale, {
               mn: "Монголчуудад зориулсан баталгаажсан ажлын байр, визний дэмжлэг, нийгэмлэгтэй холбогдох хамгийн найдвартай платформ.",
               en: "The most trusted platform for Mongolians to find verified employment, visa assistance, and community in South Korea.",
@@ -109,10 +109,10 @@ export default function LoginPage() {
             })}
           </p>
 
-          <div className="space-y-3.5">
+          <div className="space-y-3">
             {bullets.map((b) => (
-              <div key={b} className="flex items-center gap-3 text-sm font-medium">
-                <CheckCircle2 size={18} className="shrink-0 text-green-400" />
+              <div key={b} className="flex items-center gap-2.5 text-sm font-medium text-white/90">
+                <CheckCircle2 size={16} className="shrink-0 text-emerald-400" />
                 <span>{b}</span>
               </div>
             ))}
@@ -227,12 +227,15 @@ export default function LoginPage() {
                 </svg>
                 {t.google}
               </a>
-              <button
-                type="button"
-                className="flex items-center justify-center gap-2 rounded-xl bg-[#FEE500] py-2.5 text-sm font-semibold text-[#191919] shadow-sm transition hover:bg-yellow-400"
+              <a
+                href="/api/auth/facebook"
+                className="flex items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white py-2.5 text-sm font-medium shadow-sm transition hover:bg-gray-50"
               >
-                <MessageCircle size={15} /> {t.kakao}
-              </button>
+                <svg className="h-4 w-4" viewBox="0 0 24 24" fill="#1877F2">
+                  <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                </svg>
+                Facebook
+              </a>
             </div>
           </form>
 

@@ -32,17 +32,19 @@ export default async function Home() {
   const user = await getUser();
   if (user) redirect("/jobs");
 
+  const randomIds = await prisma.$queryRaw<{ id: string }[]>`
+    SELECT id FROM "Job" WHERE status = 'APPROVED' ORDER BY RANDOM() LIMIT 5
+  `;
+
   const [featuredJobs, totalJobs, verifiedCompanies] = await Promise.all([
-    prisma.job.findMany({
-      where: { status: "APPROVED", featured: true },
-      include: {
-        company: {
-          select: { name: true, logo: true, location: true, verified: true },
-        },
-      },
-      orderBy: { createdAt: "desc" },
-      take: 4,
-    }),
+    randomIds.length > 0
+      ? prisma.job.findMany({
+          where: { id: { in: randomIds.map((r) => r.id) }, status: "APPROVED" },
+          include: {
+            company: { select: { name: true, logo: true, location: true, verified: true } },
+          },
+        })
+      : Promise.resolve([]),
     prisma.job.count({ where: { status: "APPROVED" } }),
     prisma.company.count({ where: { verified: true } }),
   ]);
@@ -115,10 +117,7 @@ export default async function Home() {
               value: totalJobs > 0 ? `${totalJobs.toLocaleString()}+` : "12k+",
               label: t.stats.activeJobs,
             },
-            {
-              value: verifiedCompanies > 0 ? `${verifiedCompanies}+` : "850+",
-              label: t.stats.verifiedCompanies,
-            },
+            { value: "3", label: t.stats.verifiedCompanies },
             { value: "45k", label: t.stats.successfulPlacements },
             { value: "24/7", label: t.stats.visaSupport },
           ].map((s) => (
@@ -181,7 +180,7 @@ export default async function Home() {
               </Link>
             </div>
           ) : (
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
               {featuredJobs.map((job) => (
                 <Link
                   key={job.id}

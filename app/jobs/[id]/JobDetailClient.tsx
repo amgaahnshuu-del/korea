@@ -224,7 +224,7 @@ export default function JobDetailClient() {
 
         {/* Right sidebar */}
         <div className="w-full shrink-0 lg:w-72">
-          <div className="sticky top-24 mb-4 rounded-2xl border border-gray-200 bg-white p-5">
+          <div className="lg:sticky lg:top-24 mb-4 rounded-2xl border border-gray-200 bg-white p-5">
             <div className="mb-1 text-xl font-bold text-gray-900">{formatSalary(locale, job.salaryMin, job.salaryMax) || pick(locale, { mn: "Тохиролцоно", en: "Negotiable", ko: "협의" })}</div>
             <p className="mb-4 text-xs text-gray-400">{pick(locale, { mn: "сард", en: "per month", ko: "월" })}</p>
 

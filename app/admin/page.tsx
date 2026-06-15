@@ -105,6 +105,7 @@ export default function AdminPage() {
   const [blockingUserId, setBlockingUserId] = useState<string | null>(null);
   const [previewJob, setPreviewJob] = useState<AllJob | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [userSearch, setUserSearch] = useState("");
 
   useEffect(() => {
     fetch("/api/auth/me")
@@ -490,11 +491,20 @@ export default function AdminPage() {
           {/* ── Users ── */}
           {tab === "users" && (
             <div className="rounded-2xl border border-gray-200 bg-white p-5">
-              <div className="mb-4 flex items-center justify-between">
+              <div className="mb-4 flex items-center justify-between gap-4">
                 <h2 className="font-bold text-gray-900">{t.allUsers}</h2>
-                <span className="text-xs text-gray-400">
-                  {users.length} {pick(locale, { mn: "хэрэглэгч", en: "users", ko: "명" })}
-                </span>
+                <div className="flex items-center gap-3">
+                  <input
+                    type="text"
+                    value={userSearch}
+                    onChange={(e) => setUserSearch(e.target.value)}
+                    placeholder={pick(locale, { mn: "И-мэйлээр хайх...", en: "Search by email...", ko: "이메일로 검색..." })}
+                    className="rounded-lg border border-gray-200 px-3 py-1.5 text-xs text-gray-700 outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-100 w-56"
+                  />
+                  <span className="text-xs text-gray-400 whitespace-nowrap">
+                    {users.filter(u => u.email.toLowerCase().includes(userSearch.toLowerCase())).length} {pick(locale, { mn: "хэрэглэгч", en: "users", ko: "명" })}
+                  </span>
+                </div>
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[600px] text-sm">
@@ -509,7 +519,7 @@ export default function AdminPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {users.map((u) => (
+                    {users.filter(u => u.email.toLowerCase().includes(userSearch.toLowerCase())).map((u) => (
                       <tr key={u.id} className={`border-b border-gray-50 hover:bg-gray-50 ${u.isBlocked ? "bg-red-50/40" : ""}`}>
                         <td className="py-3">
                           <p className="font-medium text-gray-800">{u.name}</p>
@@ -541,7 +551,7 @@ export default function AdminPage() {
                         </td>
                       </tr>
                     ))}
-                    {users.length === 0 && (
+                    {users.filter(u => u.email.toLowerCase().includes(userSearch.toLowerCase())).length === 0 && (
                       <tr>
                         <td colSpan={6} className="py-12 text-center text-gray-400">{t.noUsers}</td>
                       </tr>
