@@ -72,6 +72,7 @@ interface AllJob extends JobRow {
   kakaoId: string | null;
   views: number;
   expiresAt: string | null;
+  featured: boolean;
 }
 
 const STATUS_COLORS: Record<string, string> = {
