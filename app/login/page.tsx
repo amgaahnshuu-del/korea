@@ -164,7 +164,7 @@ export default function LoginPage() {
             <div>
               <div className="mb-1.5 flex items-center justify-between">
                 <label className="text-sm font-medium text-gray-700">{t.passwordLabel}</label>
-                <a href="#" className="text-xs font-semibold text-blue-600 hover:underline">{t.forgotPassword}</a>
+                <Link href="/forgot-password" className="text-xs font-semibold text-blue-600 hover:underline">{t.forgotPassword}</Link>
               </div>
               <div className="flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-3.5 py-3 shadow-sm transition focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100">
                 <svg className="h-4 w-4 shrink-0 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">

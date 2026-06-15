@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import { Search, List, LayoutGrid, CheckCircle2, ArrowRight, SlidersHorizontal, X } from "lucide-react";
@@ -22,18 +23,19 @@ interface Job {
   company: { name: string; logo: string | null; verified: boolean; location: string };
 }
 
-export default function JobsPage() {
+function JobsContent() {
   const { locale } = useLanguage();
   const t = getTranslation(locale, "jobs");
+  const searchParams = useSearchParams();
   const [jobs, setJobs] = useState<Job[]>([]);
   const [total, setTotal] = useState(0);
   const [pages, setPages] = useState(1);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
-  const [q, setQ] = useState("");
-  const [category, setCategory] = useState("");
-  const [type, setType] = useState("");
-  const [location, setLocation] = useState("");
+  const [q, setQ] = useState(searchParams.get("q") ?? "");
+  const [category, setCategory] = useState(searchParams.get("category") ?? "");
+  const [type, setType] = useState(searchParams.get("type") ?? "");
+  const [location, setLocation] = useState(searchParams.get("location") ?? "");
   const [visa, setVisa] = useState("");
   const [salaryMin, setSalaryMin] = useState("");
   const [salaryMax, setSalaryMax] = useState("");
@@ -227,5 +229,13 @@ export default function JobsPage() {
       </div>
       <Footer />
     </div>
+  );
+}
+
+export default function JobsPage() {
+  return (
+    <Suspense fallback={null}>
+      <JobsContent />
+    </Suspense>
   );
 }

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const PUBLIC_PATHS = new Set(["/", "/about", "/contact", "/login", "/register"]);
+const PUBLIC_PATHS = new Set(["/", "/about", "/contact", "/login", "/register", "/forgot-password", "/reset-password"]);
 const PUBLIC_PREFIXES = ["/api/auth", "/_next"];
 const FILE_EXTENSION_RE = /\.[^/]+$/;
 
