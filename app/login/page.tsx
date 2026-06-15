@@ -1,14 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Eye, EyeOff, MessageCircle, CheckCircle2 } from "lucide-react";
 import { getTranslation, pick } from "@/lib/i18n";
 import { useLanguage } from "@/components/LanguageProvider";
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { locale } = useLanguage();
   const t = getTranslation(locale, "login");
   const common = getTranslation(locale, "common");
@@ -16,6 +17,25 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [showPw, setShowPw] = useState(false);
+
+  useEffect(() => {
+    const err = searchParams.get("error");
+    const msg = searchParams.get("msg");
+    if (err === "google") {
+      const detail = msg ? ` (${decodeURIComponent(msg)})` : "";
+      setError(pick(locale, {
+        mn: `Google нэвтрэлт амжилтгүй боллоо${detail}. Дахин оролдоно уу.`,
+        en: `Google sign-in failed${detail}. Please try again.`,
+        ko: `Google 로그인에 실패했습니다${detail}. 다시 시도해주세요.`,
+      }));
+    } else if (err === "blocked") {
+      setError(pick(locale, {
+        mn: "Таны бүртгэл блоклогдсон байна.",
+        en: "Your account has been blocked.",
+        ko: "계정이 차단되었습니다.",
+      }));
+    }
+  }, [searchParams, locale]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -195,8 +215,8 @@ export default function LoginPage() {
 
             {/* Social buttons */}
             <div className="grid grid-cols-2 gap-3">
-              <button
-                type="button"
+              <a
+                href="/api/auth/google"
                 className="flex items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white py-2.5 text-sm font-medium shadow-sm transition hover:bg-gray-50"
               >
                 <svg className="h-4 w-4" viewBox="0 0 24 24">
@@ -206,7 +226,7 @@ export default function LoginPage() {
                   <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
                 </svg>
                 {t.google}
-              </button>
+              </a>
               <button
                 type="button"
                 className="flex items-center justify-center gap-2 rounded-xl bg-[#FEE500] py-2.5 text-sm font-semibold text-[#191919] shadow-sm transition hover:bg-yellow-400"
