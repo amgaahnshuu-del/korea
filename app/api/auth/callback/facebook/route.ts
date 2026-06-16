@@ -13,7 +13,7 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const redirectUri = `${appUrl}/api/auth/facebook/callback`;
+    const redirectUri = `${appUrl}/api/auth/callback/facebook`;
 
     const tokenRes = await fetch(
       `https://graph.facebook.com/v19.0/oauth/access_token?` +
