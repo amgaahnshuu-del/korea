@@ -53,17 +53,17 @@ export default function ContactPage() {
       <Navbar />
 
       {/* Hero */}
-      <div className="bg-gradient-to-br from-blue-700 to-blue-900 px-4 py-14 text-white">
+      <div className="bg-[#163c4e] px-4 py-10 text-white sm:py-14">
         <div className="mx-auto max-w-6xl">
-          <div className="flex items-center gap-2 mb-3 text-blue-200 text-sm">
+          <div className="flex items-center gap-2 mb-3 text-white/60 text-sm">
             <Link href="/" className="hover:text-white transition">
               {pick(locale, { mn: "Нүүр", en: "Home", ko: "홈" })}
             </Link>
             <ChevronRight size={14} />
-            <span className="text-white">{t.title}</span>
+            <span className="text-[#22c55e]">{t.title}</span>
           </div>
           <h1 className="text-4xl font-extrabold mb-2 tracking-tight">{t.title}</h1>
-          <p className="text-blue-200 text-sm max-w-lg">{t.description}</p>
+          <p className="text-white/70 text-sm max-w-lg">{t.description}</p>
         </div>
       </div>
 
@@ -71,32 +71,32 @@ export default function ContactPage() {
       <div className="mx-auto w-full max-w-6xl px-4 -mt-6">
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           <div className="flex items-start gap-4 rounded-2xl bg-white p-5 shadow-sm border border-gray-100">
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-700">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-green-50 text-[#22c55e]">
               <Phone size={20} />
             </div>
             <div>
-              <p className="text-sm font-semibold text-gray-900">{t.phoneLabel}</p>
-              <p className="mt-0.5 text-xs text-gray-500 whitespace-pre-line leading-relaxed">{t.phoneValue}</p>
+              <p className="text-sm font-semibold text-blue-900">{t.phoneLabel}</p>
+              <p className="mt-0.5 text-xs text-blue-900 whitespace-pre-line leading-relaxed">{t.phoneValue}</p>
             </div>
           </div>
           <div className="flex items-start gap-4 rounded-2xl bg-white p-5 shadow-sm border border-gray-100">
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-700">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-green-50 text-[#22c55e]">
               <Mail size={20} />
             </div>
             <div>
-              <p className="text-sm font-semibold text-gray-900">{t.emailLabel}</p>
-              <p className="mt-0.5 text-xs text-gray-500">{t.emailValue}</p>
+              <p className="text-sm font-semibold text-blue-900">{t.emailLabel}</p>
+              <p className="mt-0.5 text-xs text-blue-900">{t.emailValue}</p>
             </div>
           </div>
           <div className="flex items-start gap-4 rounded-2xl bg-white p-5 shadow-sm border border-gray-100">
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-700">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-green-50 text-[#22c55e]">
               <Clock size={20} />
             </div>
             <div>
-              <p className="text-sm font-semibold text-gray-900">
+              <p className="text-sm font-semibold text-blue-900">
                 {pick(locale, { mn: "Ажлын цаг", en: "Working Hours", ko: "운영 시간" })}
               </p>
-              <p className="mt-0.5 text-xs text-gray-500 leading-relaxed">
+              <p className="mt-0.5 text-xs text-blue-900 leading-relaxed">
                 {pick(locale, { mn: "Даваа – Баасан\n09:00 – 18:00", en: "Mon – Fri\n09:00 – 18:00", ko: "월 – 금\n09:00 – 18:00" })}
               </p>
             </div>
@@ -123,14 +123,14 @@ export default function ContactPage() {
                   referrerPolicy="no-referrer-when-downgrade"
                   className="h-full w-full"
                 />
-                <div className="absolute bottom-3 left-3 right-3 flex items-center gap-2 rounded-xl bg-white px-3 py-2 shadow text-xs font-semibold text-gray-700">
-                  <MapPin size={13} className="text-blue-600 shrink-0" />
+                <div className="absolute bottom-3 left-3 right-3 flex items-center gap-2 rounded-xl bg-white px-3 py-2 shadow text-xs font-semibold text-blue-900">
+                  <MapPin size={13} className="text-[#22c55e] shrink-0" />
                   <span className="truncate">{t.headquartersLabel}</span>
                 </div>
               </div>
               <div className="p-4">
-                <p className="text-sm font-semibold text-gray-900">{t.headquartersLabel}</p>
-                <p className="mt-1 text-xs text-gray-500 leading-relaxed">{t.headquartersValue}</p>
+                <p className="text-sm font-semibold text-blue-900">{t.headquartersLabel}</p>
+                <p className="mt-1 text-xs text-blue-900 leading-relaxed">{t.headquartersValue}</p>
               </div>
             </div>
 
@@ -139,8 +139,8 @@ export default function ContactPage() {
               <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-gray-400">{t.socialMedia}</p>
               <div className="flex gap-2">
                 {[
-                  { label: "f", color: "hover:bg-blue-600 hover:text-white" },
-                  { label: "in", color: "hover:bg-blue-700 hover:text-white" },
+                  { label: "f", color: "hover:bg-[#22c55e] hover:text-white" },
+                  { label: "in", color: "hover:bg-[#16a34a] hover:text-white" },
                   { label: "x", color: "hover:bg-gray-900 hover:text-white" },
                 ].map((s) => (
                   <a
@@ -157,24 +157,24 @@ export default function ContactPage() {
 
           {/* Right: form */}
           <div className="flex-1">
-            <div className="rounded-2xl border border-gray-100 bg-white p-7 shadow-sm">
+            <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm sm:p-7">
               {success ? (
                 <div className="py-14 text-center">
-                  <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-50">
-                    <CheckCircle className="h-8 w-8 text-green-500" />
+                  <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[#dcfce7]">
+                    <CheckCircle className="h-8 w-8 text-[#22c55e]" />
                   </div>
-                  <h3 className="mb-2 text-xl font-bold text-gray-900">{t.messageSentTitle}</h3>
-                  <p className="mb-6 text-sm text-gray-500">{t.messageSentText}</p>
+                  <h3 className="mb-2 text-xl font-bold text-blue-900">{t.messageSentTitle}</h3>
+                  <p className="mb-6 text-sm text-blue-900">{t.messageSentText}</p>
                   <button
                     onClick={() => setSuccess(false)}
-                    className="rounded-xl bg-blue-700 px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-800"
+                    className="rounded-full bg-[#22c55e] px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-[#16a34a]"
                   >
                     {t.sendAnother}
                   </button>
                 </div>
               ) : (
                 <>
-                  <h2 className="mb-1 text-lg font-bold text-gray-900">
+                  <h2 className="mb-1 text-lg font-bold text-blue-900">
                     {pick(locale, { mn: "Мессеж илгээх", en: "Send a Message", ko: "메시지 보내기" })}
                   </h2>
                   <p className="mb-6 text-sm text-gray-400">
@@ -188,36 +188,36 @@ export default function ContactPage() {
                   <form onSubmit={handleSubmit} className="space-y-4">
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                       <div>
-                        <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500">{t.form.fullName}</label>
+                        <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-blue-900">{t.form.fullName}</label>
                         <input
                           type="text"
                           value={form.name}
                           onChange={(e) => setForm({ ...form, name: e.target.value })}
                           placeholder={pick(locale, { mn: "Бүтэн нэрээ оруулна уу", en: "Enter your full name", ko: "이름을 입력해 주세요" })}
                           required
-                          className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm outline-none transition focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-100"
+                          className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm outline-none transition focus:border-[#22c55e] focus:bg-white focus:ring-2 focus:ring-[#22c55e]/10"
                         />
                       </div>
                       <div>
-                        <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500">{t.form.email}</label>
+                        <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-blue-900">{t.form.email}</label>
                         <input
                           type="email"
                           value={form.email}
                           onChange={(e) => setForm({ ...form, email: e.target.value })}
                           placeholder="name@example.com"
                           required
-                          className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm outline-none transition focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-100"
+                          className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm outline-none transition focus:border-[#22c55e] focus:bg-white focus:ring-2 focus:ring-[#22c55e]/10"
                         />
                       </div>
                     </div>
 
                     <div>
-                      <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500">{t.form.subject}</label>
+                      <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-blue-900">{t.form.subject}</label>
                       <select
                         value={form.subject}
                         onChange={(e) => setForm({ ...form, subject: e.target.value })}
                         required
-                        className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm outline-none transition focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-100"
+                        className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm outline-none transition focus:border-[#22c55e] focus:bg-white focus:ring-2 focus:ring-[#22c55e]/10"
                       >
                         <option value="">{pick(locale, { mn: "Сэдвээ сонгоно уу...", en: "Select a subject...", ko: "주제를 선택해 주세요..." })}</option>
                         {SUBJECT_OPTIONS.map((subject) => (
@@ -229,7 +229,7 @@ export default function ContactPage() {
                     </div>
 
                     <div>
-                      <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500">{t.form.message}</label>
+                      <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-blue-900">{t.form.message}</label>
                       <textarea
                         value={form.message}
                         onChange={(e) => setForm({ ...form, message: e.target.value })}
@@ -240,14 +240,14 @@ export default function ContactPage() {
                         })}
                         required
                         rows={5}
-                        className="w-full resize-none rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm outline-none transition focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-100"
+                        className="w-full resize-none rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm outline-none transition focus:border-[#22c55e] focus:bg-white focus:ring-2 focus:ring-[#22c55e]/10"
                       />
                     </div>
 
                     <button
                       type="submit"
                       disabled={loading}
-                      className="inline-flex items-center gap-2 rounded-xl bg-blue-700 px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-800 disabled:opacity-60"
+                      className="inline-flex items-center gap-2 rounded-full bg-[#22c55e] px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-[#16a34a] disabled:opacity-60"
                     >
                       {loading
                         ? pick(locale, { mn: "Илгээж байна...", en: "Sending...", ko: "전송 중..." })
@@ -261,20 +261,6 @@ export default function ContactPage() {
           </div>
         </div>
       </div>
-
-      {/* CTA */}
-      <section className="mt-4 bg-blue-700 px-4 py-12 text-center text-white">
-        <h2 className="mb-2 text-xl font-bold">{t.readyTitle}</h2>
-        <p className="mb-5 text-sm text-blue-100">{t.readyText}</p>
-        <div className="flex flex-wrap justify-center gap-4">
-          <Link href="/jobs" className="rounded-xl bg-white px-6 py-2.5 text-sm font-semibold text-blue-700 transition hover:bg-blue-50">
-            {t.exploreJobs}
-          </Link>
-          <Link href="/about" className="rounded-xl border border-white px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-600">
-            {t.successStories}
-          </Link>
-        </div>
-      </section>
 
       <Footer />
     </div>

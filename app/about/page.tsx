@@ -45,10 +45,10 @@ function getTimeline(locale: Locale): TimelineItem[] {
 
 function getTeam(locale: Locale) {
   return [
-    { name: "Ariunbold T.", role: pick(locale, { mn: "Гүйцэтгэх захирал, үүсгэн байгуулагч", en: "CEO & Founder", ko: "CEO, 창업자" }), bg: "bg-gray-200" },
-    { name: "Mina Park", role: pick(locale, { mn: "Сөүл дэх үйл ажиллагааны менежер", en: "Operations Manager, Seoul", ko: "운영 매니저, 서울" }), bg: "bg-gray-300" },
-    { name: "Gantulaar L.", role: pick(locale, { mn: "Хөдөлмөрийн эрхийн зөвлөх", en: "Labor Law Advisor", ko: "노동법 자문" }), bg: "bg-gray-200" },
-    { name: "Yalj Ohal", role: pick(locale, { mn: "Платформын техникийн хариуцлагатан", en: "Lead Engineer", ko: "수석 엔지니어" }), bg: "bg-gray-300" },
+    { name: "Ariunbold T.", role: pick(locale, { mn: "Гүйцэтгэх захирал, үүсгэн байгуулагч", en: "CEO & Founder", ko: "CEO, 창업자" }), bg: "bg-[#eef7f1]" },
+    { name: "Mina Park",    role: pick(locale, { mn: "Сөүл дэх үйл ажиллагааны менежер", en: "Operations Manager, Seoul", ko: "운영 매니저, 서울" }), bg: "bg-[#dcfce7]" },
+    { name: "Gantulaar L.", role: pick(locale, { mn: "Хөдөлмөрийн эрхийн зөвлөх", en: "Labor Law Advisor", ko: "노동법 자문" }), bg: "bg-[#eef7f1]" },
+    { name: "Yalj Ohal",    role: pick(locale, { mn: "Платформын техникийн хариуцлагатан", en: "Lead Engineer", ko: "수석 엔지니어" }), bg: "bg-[#dcfce7]" },
   ];
 }
 
@@ -64,80 +64,100 @@ export default async function AboutPage() {
     <div className="flex min-h-screen flex-col">
       <Navbar />
 
-      <section className="bg-linear-to-br from-blue-900 to-blue-700 px-4 py-20 text-white">
-        <div className="mx-auto flex max-w-6xl flex-col items-center gap-12 md:flex-row">
+      {/* ── Hero ─────────────────────────────────────────────────────── */}
+      <section className="bg-[#163c4e] px-4 py-12 text-white md:py-20">
+        <div className="mx-auto flex max-w-6xl flex-col items-center gap-10 md:flex-row md:gap-12">
           <div className="flex-1">
-            <div className="mb-4 inline-block rounded-full border border-blue-400/30 bg-blue-600/40 px-3 py-1 text-xs text-blue-200">
+            <div className="mb-4 inline-block rounded-full border border-[#22c55e]/30 bg-[#22c55e]/20 px-3 py-1 text-xs text-[#4ade80]">
               {t.badge}
             </div>
-            <h1 className="mb-4 text-4xl font-extrabold leading-tight">
-              {t.heading}
-            </h1>
-            <p className="mb-6 text-sm text-blue-100">{t.description}</p>
-            <div className="flex gap-4">
-              <Link href="/jobs" className="rounded-xl bg-white px-5 py-2.5 text-sm font-semibold text-blue-700 transition hover:bg-blue-50">
+            <h1 className="mb-4 text-3xl font-extrabold leading-tight md:text-4xl">{t.heading}</h1>
+            <p className="mb-6 text-sm text-white/75">{t.description}</p>
+            <div className="flex flex-wrap gap-3 sm:gap-4">
+              <Link
+                href="/jobs"
+                className="rounded-full bg-[#22c55e] px-5 py-2.5 text-sm font-semibold text-white transition-all duration-200 hover:bg-[#16a34a]"
+              >
                 {t.viewJobs}
               </Link>
-              <a href="#team" className="rounded-xl border border-white px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-800">
+              <a
+                href="#team"
+                className="rounded-full border border-white/40 px-5 py-2.5 text-sm font-semibold text-white transition-all duration-200 hover:bg-white/10"
+              >
                 {t.learnTeam}
               </a>
             </div>
           </div>
           <div className="hidden flex-col items-center gap-3 md:flex">
-            <div className="w-40 rounded-2xl bg-blue-600/50 p-5 text-center">
+            <div className="w-40 rounded-2xl bg-[#22c55e]/20 p-5 text-center">
               <div className="text-3xl font-bold">5,000+</div>
-              <div className="text-xs text-blue-200">{pick(locale, { mn: "Энэ жил ажилд орсон", en: "Placed this year", ko: "올해 취업" })}</div>
+              <div className="text-xs text-white/65">
+                {pick(locale, { mn: "Энэ жил ажилд орсон", en: "Placed this year", ko: "올해 취업" })}
+              </div>
             </div>
           </div>
         </div>
       </section>
 
+      {/* ── Values ───────────────────────────────────────────────────── */}
       <section className="bg-white px-4 py-16">
         <div className="mx-auto max-w-6xl">
-          <h2 className="mb-2 text-center text-2xl font-bold text-gray-900">{t.valuesTitle}</h2>
-          <p className="mb-10 text-center text-sm text-gray-500">{t.valuesDescription}</p>
+          <h2 className="mb-2 text-center text-2xl font-bold text-[#0f2e2a]">{t.valuesTitle}</h2>
+          <p className="mb-10 text-center text-sm text-[#5b7268]">{t.valuesDescription}</p>
 
           <div className="grid gap-6 md:grid-cols-3">
             {values.map((value: { title: string; desc: string }) => (
-              <div key={value.title} className="rounded-2xl bg-gray-50 p-6">
-                <h3 className="mb-2 font-bold text-gray-900">{value.title}</h3>
-                <p className="text-sm leading-relaxed text-gray-500">{value.desc}</p>
+              <div key={value.title} className="rounded-2xl bg-[#eef7f1] p-6">
+                <h3 className="mb-2 font-bold text-[#0f2e2a]">{value.title}</h3>
+                <p className="text-sm leading-relaxed text-[#5b7268]">{value.desc}</p>
               </div>
             ))}
           </div>
 
-          <div className="mt-8 rounded-2xl border border-blue-100 bg-blue-50 p-6 text-center">
-            <h3 className="mb-2 text-lg font-bold text-blue-800">{t.promiseTitle}</h3>
-            <p className="text-sm text-blue-700">{t.promiseText}</p>
+          <div className="mt-8 rounded-2xl border border-[#22c55e]/20 bg-[#eef7f1] p-6 text-center">
+            <h3 className="mb-2 text-lg font-bold text-[#0f3d3a]">{t.promiseTitle}</h3>
+            <p className="text-sm text-[#16a34a]">{t.promiseText}</p>
           </div>
         </div>
       </section>
 
-      <section className="bg-blue-700 px-4 py-12 text-white">
+      {/* ── Training ─────────────────────────────────────────────────── */}
+      <section className="bg-[#163c4e] px-4 py-12 text-white">
         <div className="mx-auto max-w-6xl text-center">
-          <Plane className="mx-auto mb-3 h-8 w-8" />
+          <Plane className="mx-auto mb-3 h-8 w-8 text-[#4ade80]" />
           <h2 className="mb-2 text-xl font-bold">{t.trainingTitle}</h2>
-          <p className="mx-auto max-w-lg text-sm text-blue-100">{t.trainingText}</p>
+          <p className="mx-auto max-w-lg text-sm text-white/70">{t.trainingText}</p>
         </div>
       </section>
 
-      <section className="bg-gray-50 px-4 py-16">
+      {/* ── Timeline ─────────────────────────────────────────────────── */}
+      <section className="bg-[#f0faf4] px-4 py-16">
         <div className="mx-auto max-w-3xl">
-          <h2 className="mb-2 text-2xl font-bold text-gray-900">{t.timelineTitle}</h2>
-          <p className="mb-10 text-sm text-gray-500">{pick(locale, { mn: "Ajil Korea нь нэг хүний туршлагаас гарч ирсэн.", en: "Ajil Korea grew from one person's experience.", ko: "Ajil Korea는 한 사람의 경험에서 시작되었습니다." })}</p>
+          <h2 className="mb-2 text-2xl font-bold text-[#0f2e2a]">{t.timelineTitle}</h2>
+          <p className="mb-10 text-sm text-[#5b7268]">
+            {pick(locale, {
+              mn: "Ajil Korea нь нэг хүний туршлагаас гарч ирсэн.",
+              en: "Ajil Korea grew from one person's experience.",
+              ko: "Ajil Korea는 한 사람의 경험에서 시작되었습니다.",
+            })}
+          </p>
           <div className="space-y-8">
             {timeline.map((item, i) => (
               <div key={item.year} className="flex gap-5">
                 <div className="flex flex-col items-center">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-700 text-sm font-bold text-white">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#22c55e] text-sm font-bold text-white">
                     {i + 1}
                   </div>
-                  {i < timeline.length - 1 && <div className="mt-2 flex-1 w-px bg-blue-200" />}
+                  {i < timeline.length - 1 && (
+                    <div className="mt-2 w-px flex-1 bg-[#22c55e]/30" />
+                  )}
                 </div>
                 <div className="pb-8">
-                  <div className="mb-1 text-xs font-semibold text-blue-600">{pick(locale, { mn: `${item.year} он`, en: `${item.year}`, ko: `${item.year}년` })}</div>
-                  <h3 className="mb-1 font-bold text-gray-900">{item.title}</h3>
-                  <p className="text-sm text-gray-500">{item.desc}</p>
+                  <div className="mb-1 text-xs font-semibold text-[#16a34a]">
+                    {pick(locale, { mn: `${item.year} он`, en: `${item.year}`, ko: `${item.year}년` })}
+                  </div>
+                  <h3 className="mb-1 font-bold text-[#0f2e2a]">{item.title}</h3>
+                  <p className="text-sm text-[#5b7268]">{item.desc}</p>
                 </div>
               </div>
             ))}
@@ -145,14 +165,18 @@ export default async function AboutPage() {
         </div>
       </section>
 
+      {/* ── Team ─────────────────────────────────────────────────────── */}
       <section id="team" className="bg-white px-4 py-16">
         <div className="mx-auto max-w-6xl">
-          <div className="mb-8 flex items-center justify-between">
+          <div className="mb-8 flex flex-wrap items-start justify-between gap-4">
             <div>
-              <h2 className="text-2xl font-bold text-gray-900">{t.teamTitle}</h2>
-              <p className="mt-1 text-sm text-gray-500">{t.teamSubtitle}</p>
+              <h2 className="text-2xl font-bold text-[#0f2e2a]">{t.teamTitle}</h2>
+              <p className="mt-1 text-sm text-[#5b7268]">{t.teamSubtitle}</p>
             </div>
-            <Link href="/register" className="text-sm font-semibold text-blue-600 hover:underline">
+            <Link
+              href="/register"
+              className="shrink-0 text-sm font-semibold text-[#16a34a] transition hover:underline"
+            >
               {pick(locale, { mn: "Бидэнтэй нэгдэх →", en: "Join the Team →", ko: "팀에 합류 →" })}
             </Link>
           </div>
@@ -160,24 +184,27 @@ export default async function AboutPage() {
             {team.map((member) => (
               <div key={member.name} className="text-center">
                 <div className={`mx-auto mb-3 flex h-24 w-24 items-center justify-center rounded-2xl ${member.bg}`}>
-                  <User className="h-10 w-10 text-current opacity-60" />
+                  <User className="h-10 w-10 text-[#16a34a] opacity-60" />
                 </div>
-                <p className="text-sm font-semibold text-gray-900">{member.name}</p>
-                <p className="mt-1 text-xs text-gray-400">{member.role}</p>
+                <p className="text-sm font-semibold text-[#0f2e2a]">{member.name}</p>
+                <p className="mt-1 text-xs text-[#5b7268]">{member.role}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      <section className="bg-blue-700 px-4 py-16 text-center text-white">
-        <h2 className="mb-2 text-2xl font-bold">{pick(locale, { mn: "Солонгост ажил хайж байна уу?", en: "Looking for work in Korea?", ko: "한국에서 일자리를 찾고 계신가요?" })}</h2>
-        <p className="mb-6 text-sm text-blue-100">{t.ctaText}</p>
+      {/* ── CTA ──────────────────────────────────────────────────────── */}
+      <section className="bg-[#163c4e] px-4 py-12 text-center text-white">
+        <h2 className="mb-2 text-2xl font-bold">
+          {pick(locale, { mn: "Солонгост ажил хайж байна уу?", en: "Looking for work in Korea?", ko: "한국에서 일자리를 찾고 계신가요?" })}
+        </h2>
+        <p className="mb-6 text-sm text-white/70">{t.ctaText}</p>
         <div className="flex flex-wrap justify-center gap-4">
-          <Link href="/jobs" className="rounded-xl bg-white px-6 py-3 font-semibold text-blue-700 transition hover:bg-blue-50">
+          <Link href="/jobs" className="rounded-full bg-[#22c55e] px-6 py-2.5 font-semibold text-white transition-all duration-200 hover:bg-[#16a34a]">
             {t.ctaBrowseJobs}
           </Link>
-          <Link href="/contact" className="rounded-xl border border-white px-6 py-3 font-semibold text-white transition hover:bg-blue-600">
+          <Link href="/contact" className="rounded-full border border-white/40 px-6 py-2.5 font-semibold text-white transition-all duration-200 hover:bg-white/10">
             {t.ctaContact}
           </Link>
         </div>

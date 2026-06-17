@@ -37,12 +37,8 @@ export function formatSalary(locale: Locale, min?: number | null, max?: number |
     return pick(locale, { mn: "Тохиролцоно", en: "Negotiable", ko: "협의" });
   }
 
-  const formatter = new Intl.NumberFormat(LOCALE_TAGS[locale], {
-    style: "currency",
-    currency: "KRW",
-    maximumFractionDigits: 0,
-  });
-  const format = (value: number) => formatter.format(value);
+  const numFormatter = new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 });
+  const format = (value: number) => `₩${numFormatter.format(value)}`;
 
   if (min && max) return `${format(min)} - ${format(max)}`;
   if (min) return `${format(min)}+`;

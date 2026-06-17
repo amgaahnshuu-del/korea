@@ -3,14 +3,14 @@ export default function PrivacyPolicyPage() {
     <div className="max-w-3xl mx-auto px-4 py-12">
       <h1 className="text-3xl font-bold mb-8">Privacy Policy / Нууцлалын бодлого</h1>
 
-      <p className="text-gray-500 mb-8">Last updated: June 2026</p>
+      <p className="text-blue-900 mb-8">Last updated: June 2026</p>
 
       <section className="mb-8">
         <h2 className="text-xl font-semibold mb-3">1. Information We Collect</h2>
-        <p className="text-gray-700 mb-2">
+        <p className="text-blue-900 mb-2">
           When you use Ajil Korea, we may collect the following information:
         </p>
-        <ul className="list-disc pl-6 text-gray-700 space-y-1">
+        <ul className="list-disc pl-6 text-blue-900 space-y-1">
           <li>Name and email address (from Facebook or Google login)</li>
           <li>Profile picture (from Facebook or Google)</li>
           <li>Job application data you submit</li>
@@ -20,7 +20,7 @@ export default function PrivacyPolicyPage() {
 
       <section className="mb-8">
         <h2 className="text-xl font-semibold mb-3">2. How We Use Your Information</h2>
-        <ul className="list-disc pl-6 text-gray-700 space-y-1">
+        <ul className="list-disc pl-6 text-blue-900 space-y-1">
           <li>To create and manage your account</li>
           <li>To allow you to apply for jobs</li>
           <li>To send you notifications about your applications</li>
@@ -30,7 +30,7 @@ export default function PrivacyPolicyPage() {
 
       <section className="mb-8">
         <h2 className="text-xl font-semibold mb-3">3. Facebook Login</h2>
-        <p className="text-gray-700">
+        <p className="text-blue-900">
           If you log in with Facebook, we receive your name, email address, and profile picture
           from Facebook. We do not store your Facebook password or access your friends list.
           We only request the minimum permissions needed: <strong>email</strong> and{" "}
@@ -40,7 +40,7 @@ export default function PrivacyPolicyPage() {
 
       <section className="mb-8">
         <h2 className="text-xl font-semibold mb-3">4. Data Sharing</h2>
-        <p className="text-gray-700">
+        <p className="text-blue-900">
           We do not sell or share your personal data with third parties, except when required
           by law or to provide our services (e.g., database hosting).
         </p>
@@ -48,10 +48,10 @@ export default function PrivacyPolicyPage() {
 
       <section className="mb-8">
         <h2 className="text-xl font-semibold mb-3">5. Data Deletion</h2>
-        <p className="text-gray-700">
+        <p className="text-blue-900">
           You can request deletion of your account and all associated data at any time.
           Visit our{" "}
-          <a href="/data-deletion" className="text-blue-600 underline">
+          <a href="/data-deletion" className="text-[#22c55e] underline">
             Data Deletion page
           </a>{" "}
           for instructions.
@@ -60,9 +60,9 @@ export default function PrivacyPolicyPage() {
 
       <section className="mb-8">
         <h2 className="text-xl font-semibold mb-3">6. Contact</h2>
-        <p className="text-gray-700">
+        <p className="text-blue-900">
           If you have any questions about this privacy policy, please contact us at:{" "}
-          <a href="mailto:batukakkr@gmail.com" className="text-blue-600 underline">
+          <a href="mailto:batukakkr@gmail.com" className="text-[#22c55e] underline">
             batukakkr@gmail.com
           </a>
         </p>
@@ -74,7 +74,7 @@ export default function PrivacyPolicyPage() {
 
       <section className="mb-8">
         <h2 className="text-xl font-semibold mb-3">1. Цуглуулдаг мэдээлэл</h2>
-        <ul className="list-disc pl-6 text-gray-700 space-y-1">
+        <ul className="list-disc pl-6 text-blue-900 space-y-1">
           <li>Нэр болон и-мэйл хаяг (Facebook эсвэл Google нэвтрэлтээс)</li>
           <li>Профайл зураг</li>
           <li>Ажлын өргөдлийн мэдээлэл</li>
@@ -84,7 +84,7 @@ export default function PrivacyPolicyPage() {
 
       <section className="mb-8">
         <h2 className="text-xl font-semibold mb-3">2. Facebook нэвтрэлт</h2>
-        <p className="text-gray-700">
+        <p className="text-blue-900">
           Facebook-ээр нэвтэрвэл бид таны нэр, и-мэйл, профайл зургийг авна.
           Нууц үг болон найзуудын жагсаалтад хандахгүй. Зөвхөн{" "}
           <strong>email</strong> болон <strong>public_profile</strong> зөвшөөрлийг ашиглана.
@@ -93,9 +93,9 @@ export default function PrivacyPolicyPage() {
 
       <section className="mb-8">
         <h2 className="text-xl font-semibold mb-3">3. Мэдээлэл устгах</h2>
-        <p className="text-gray-700">
+        <p className="text-blue-900">
           Та өөрийн бүртгэл болон бүх мэдээллийг устгуулахыг хүсвэл{" "}
-          <a href="/data-deletion" className="text-blue-600 underline">
+          <a href="/data-deletion" className="text-[#22c55e] underline">
             Мэдээлэл устгах хуудас
           </a>
           -руу орно уу.

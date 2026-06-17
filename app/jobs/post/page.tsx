@@ -25,7 +25,7 @@ const JOB_STATUS_COLORS: Record<string, string> = {
   PENDING:  "bg-yellow-100 text-yellow-700",
   APPROVED: "bg-green-100 text-green-700",
   REJECTED: "bg-red-100 text-red-700",
-  EXPIRED:  "bg-gray-100 text-gray-500",
+  EXPIRED:  "bg-gray-100 text-blue-900",
 };
 
 type JobForm = {
@@ -313,7 +313,7 @@ export default function PostJobPage() {
   if (authChecking) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gray-50">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-700 border-t-transparent" />
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#22c55e] border-t-transparent" />
       </div>
     );
   }
@@ -325,18 +325,18 @@ export default function PostJobPage() {
       <main className="mx-auto w-full max-w-7xl px-4 py-10">
         <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div>
-            <Link href={canManageJobs ? "/recruiter" : "/jobs"} className="text-sm text-blue-600 hover:underline">
+            <Link href={canManageJobs ? "/recruiter" : "/jobs"} className="text-sm text-[#22c55e] hover:underline">
               {canManageJobs
                 ? pick(locale, { mn: "Хяналтын самбар руу буцах", en: "Back to dashboard", ko: "대시보드로 돌아가기" })
                 : t.backLink}
             </Link>
-            <h1 className="mt-2 text-3xl font-bold text-gray-900">{t.heading}</h1>
-            <p className="mt-2 max-w-2xl text-sm text-gray-500">{t.description}</p>
+            <h1 className="mt-2 text-3xl font-bold text-blue-900">{t.heading}</h1>
+            <p className="mt-2 max-w-2xl text-sm text-blue-900">{t.description}</p>
           </div>
 
           <Link
             href="/recruiter"
-            className="inline-flex items-center justify-center rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50"
+            className="inline-flex items-center justify-center rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-blue-900 hover:bg-gray-50"
           >
             {pick(locale, { mn: "Ажил олгогчийн порталыг нээх", en: "Open recruiter portal", ko: "채용자 포털 열기" })}
           </Link>
@@ -346,8 +346,8 @@ export default function PostJobPage() {
           <section className="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">
             <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <h2 className="text-xl font-bold text-gray-900">{pick(locale, { mn: "Зар үүсгэх", en: "Create a job post", ko: "공고 작성" })}</h2>
-                <p className="text-sm text-gray-500">{pick(locale, { mn: "Доорх мэдээллийг бөглөөд компанийн профайлдаа нийтлэнэ үү.", en: "Fill in the details below and publish to your company profile.", ko: "아래 정보를 입력하고 회사 프로필에 게시하세요." })}</p>
+                <h2 className="text-xl font-bold text-blue-900">{pick(locale, { mn: "Зар үүсгэх", en: "Create a job post", ko: "공고 작성" })}</h2>
+                <p className="text-sm text-blue-900">{pick(locale, { mn: "Доорх мэдээллийг бөглөөд компанийн профайлдаа нийтлэнэ үү.", en: "Fill in the details below and publish to your company profile.", ko: "아래 정보를 입력하고 회사 프로필에 게시하세요." })}</p>
               </div>
 
             </div>
@@ -357,7 +357,7 @@ export default function PostJobPage() {
 
             <form onSubmit={handleSubmit} className="space-y-5">
               <div>
-                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500">
+                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-blue-900">
                   {t.title} <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -365,19 +365,19 @@ export default function PostJobPage() {
                   onChange={(e) => updateField("title", e.target.value)}
                   required
                   placeholder={pick(locale, { mn: "Жишээ: Ахлах Frontend хөгжүүлэгч", en: "Example: Senior Frontend Developer", ko: "예: 시니어 프론트엔드 개발자" })}
-                  className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm outline-none transition focus:border-blue-400"
+                  className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm outline-none transition focus:border-[#22c55e]"
                 />
               </div>
 
               <div className="grid gap-4 md:grid-cols-2">
                 <div>
-                  <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500">
+                  <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-blue-900">
                     {t.type} <span className="text-red-500">*</span>
                   </label>
                   <select
                     value={form.type}
                     onChange={(e) => updateField("type", e.target.value)}
-                    className="w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm outline-none transition focus:border-blue-400"
+                    className="w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm outline-none transition focus:border-[#22c55e]"
                   >
                     {JOB_TYPES.map((type) => (
                       <option key={type} value={type}>
@@ -388,13 +388,13 @@ export default function PostJobPage() {
                 </div>
 
                 <div>
-                  <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500">
+                  <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-blue-900">
                     {t.category} <span className="text-red-500">*</span>
                   </label>
                   <select
                     value={form.category}
                     onChange={(e) => updateField("category", e.target.value)}
-                    className="w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm outline-none transition focus:border-blue-400"
+                    className="w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm outline-none transition focus:border-[#22c55e]"
                   >
                     {CATEGORY_KEYS.map((categoryKey) => (
                       <option key={categoryKey} value={categoryKey}>
@@ -406,7 +406,7 @@ export default function PostJobPage() {
               </div>
 
               <div>
-                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500">
+                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-blue-900">
                   {t.location} <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -414,61 +414,61 @@ export default function PostJobPage() {
                   onChange={(e) => updateField("location", e.target.value)}
                   required
                   placeholder={pick(locale, { mn: "Жишээ: Сөүл, БНСУ", en: "Example: Seoul, South Korea", ko: "예: 서울, 대한민국" })}
-                  className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm outline-none transition focus:border-blue-400"
+                  className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm outline-none transition focus:border-[#22c55e]"
                 />
               </div>
 
               <div>
-                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500">
+                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-blue-900">
                   {pick(locale, { mn: "Холбоо барих утас", en: "Contact Phone", ko: "연락처 전화번호" })}
                 </label>
                 <input
                   value={form.contactPhone}
                   onChange={(e) => updateField("contactPhone", e.target.value)}
                   placeholder={pick(locale, { mn: "Жишээ: +82 10-1234-5678", en: "Example: +82 10-1234-5678", ko: "예: +82 10-1234-5678" })}
-                  className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm outline-none transition focus:border-blue-400"
+                  className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm outline-none transition focus:border-[#22c55e]"
                 />
               </div>
 
               <div className="grid gap-4 md:grid-cols-3">
                 <div>
-                  <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500">
+                  <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-blue-900">
                     {pick(locale, { mn: "Ажил олгогчийн нэр", en: "Recruiter Name", ko: "담당자 이름" })}
                   </label>
                   <input
                     value={form.recruiterName}
                     onChange={(e) => updateField("recruiterName", e.target.value)}
                     placeholder={pick(locale, { mn: "Жишээ: Батбаяр", en: "e.g. John Kim", ko: "예: 김철수" })}
-                    className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm outline-none transition focus:border-blue-400"
+                    className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm outline-none transition focus:border-[#22c55e]"
                   />
                 </div>
                 <div>
-                  <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500">
+                  <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-blue-900">
                     {pick(locale, { mn: "Утасны дугаар", en: "Phone Number", ko: "전화번호" })}
                   </label>
                   <input
                     value={form.phoneNumber}
                     onChange={(e) => updateField("phoneNumber", e.target.value)}
                     placeholder="+82 10-0000-0000"
-                    className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm outline-none transition focus:border-blue-400"
+                    className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm outline-none transition focus:border-[#22c55e]"
                   />
                 </div>
                 <div>
-                  <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500">
+                  <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-blue-900">
                     KakaoTalk ID
                   </label>
                   <input
                     value={form.kakaoId}
                     onChange={(e) => updateField("kakaoId", e.target.value)}
                     placeholder={pick(locale, { mn: "Kakao ID", en: "Kakao ID", ko: "카카오톡 ID" })}
-                    className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm outline-none transition focus:border-blue-400"
+                    className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm outline-none transition focus:border-[#22c55e]"
                   />
                 </div>
               </div>
 
               <div className="grid gap-4 md:grid-cols-2">
                 <div>
-                  <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500">
+                  <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-blue-900">
                     {t.salaryMin}
                   </label>
                   <input
@@ -477,12 +477,12 @@ export default function PostJobPage() {
                     onChange={(e) => updateField("salaryMin", e.target.value)}
                     min={0}
                     placeholder={pick(locale, { mn: "Доод сарын цалин", en: "Minimum monthly salary", ko: "최저 월급" })}
-                    className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm outline-none transition focus:border-blue-400"
+                    className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm outline-none transition focus:border-[#22c55e]"
                   />
                 </div>
 
                 <div>
-                  <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500">
+                  <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-blue-900">
                     {t.salaryMax}
                   </label>
                   <input
@@ -491,13 +491,13 @@ export default function PostJobPage() {
                     onChange={(e) => updateField("salaryMax", e.target.value)}
                     min={0}
                     placeholder={pick(locale, { mn: "Дээд сарын цалин", en: "Maximum monthly salary", ko: "최대 월급" })}
-                    className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm outline-none transition focus:border-blue-400"
+                    className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm outline-none transition focus:border-[#22c55e]"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500">
+                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-blue-900">
                   {t.descriptionLabel} <span className="text-red-500">*</span>
                 </label>
                 <textarea
@@ -510,12 +510,12 @@ export default function PostJobPage() {
                     en: "Describe the role, responsibilities, and what makes it a great opportunity.",
                     ko: "직무, 책임, 그리고 매력적인 점을 설명해 주세요.",
                   })}
-                  className="w-full resize-none rounded-xl border border-gray-200 px-4 py-2.5 text-sm outline-none transition focus:border-blue-400"
+                  className="w-full resize-none rounded-xl border border-gray-200 px-4 py-2.5 text-sm outline-none transition focus:border-[#22c55e]"
                 />
               </div>
 
               <div>
-                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500">
+                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-blue-900">
                   {t.requirements}
                 </label>
                 <textarea
@@ -527,12 +527,12 @@ export default function PostJobPage() {
                     en: "Add qualifications, experience, or skills.",
                     ko: "자격 요건, 경력, 기술을 입력해 주세요.",
                   })}
-                  className="w-full resize-none rounded-xl border border-gray-200 px-4 py-2.5 text-sm outline-none transition focus:border-blue-400"
+                  className="w-full resize-none rounded-xl border border-gray-200 px-4 py-2.5 text-sm outline-none transition focus:border-[#22c55e]"
                 />
               </div>
 
               <div>
-                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500">
+                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-blue-900">
                   {t.benefits}
                 </label>
                 <textarea
@@ -544,21 +544,21 @@ export default function PostJobPage() {
                     en: "Mention perks, leave, housing support, visa help, and more.",
                     ko: "복지, 휴가, 숙소 지원, 비자 도움 등을 적어 주세요.",
                   })}
-                  className="w-full resize-none rounded-xl border border-gray-200 px-4 py-2.5 text-sm outline-none transition focus:border-blue-400"
+                  className="w-full resize-none rounded-xl border border-gray-200 px-4 py-2.5 text-sm outline-none transition focus:border-[#22c55e]"
                 />
               </div>
 
               <div className="flex flex-col gap-3 pt-2 sm:flex-row">
                 <Link
                   href={canManageJobs ? "/recruiter" : "/jobs"}
-                  className="inline-flex flex-1 items-center justify-center rounded-xl border border-gray-200 px-4 py-3 text-sm font-semibold text-gray-700 hover:bg-gray-50"
+                  className="inline-flex flex-1 items-center justify-center rounded-xl border border-gray-200 px-4 py-3 text-sm font-semibold text-blue-900 hover:bg-gray-50"
                 >
                   {common.cancel}
                 </Link>
                 <button
                   type="submit"
                   disabled={loading}
-                  className="inline-flex flex-1 items-center justify-center rounded-xl bg-blue-700 px-4 py-3 text-sm font-semibold text-white transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="inline-flex flex-1 items-center justify-center rounded-xl bg-[#22c55e] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#16a34a] disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {loading ? t.posting : t.createButton}
                 </button>
@@ -569,8 +569,8 @@ export default function PostJobPage() {
           <section className="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">
             <div className="mb-5 flex items-center justify-between gap-3">
               <div>
-                <h2 className="text-xl font-bold text-gray-900">{t.myPostedJobs}</h2>
-                <p className="text-sm text-gray-500">
+                <h2 className="text-xl font-bold text-blue-900">{t.myPostedJobs}</h2>
+                <p className="text-sm text-blue-900">
                   {counts.total} {t.totalListings}
                 </p>
               </div>
@@ -578,7 +578,7 @@ export default function PostJobPage() {
               <button
                 type="button"
                 onClick={loadJobs}
-                className="rounded-xl border border-gray-200 px-3 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50"
+                className="rounded-xl border border-gray-200 px-3 py-2 text-sm font-semibold text-blue-900 hover:bg-gray-50"
               >
                 {t.refresh}
               </button>
@@ -587,16 +587,16 @@ export default function PostJobPage() {
             {/* Received CVs */}
             <div className="mb-5">
               <div className="mb-3 flex items-center justify-between">
-                <p className="text-sm font-semibold text-gray-700">
+                <p className="text-sm font-semibold text-blue-900">
                   {pick(locale, { mn: "Ирсэн CV", en: "Received CVs", ko: "받은 CV" })}
-                  <span className="ml-2 rounded-full bg-blue-100 px-2 py-0.5 text-xs font-bold text-blue-700">{apps.length}</span>
+                  <span className="ml-2 rounded-full bg-[#dcfce7] px-2 py-0.5 text-xs font-bold text-[#22c55e]">{apps.length}</span>
                 </p>
               </div>
 
               {apps.length === 0 ? (
                 <div className="rounded-2xl border border-dashed border-gray-200 bg-gray-50 py-8 text-center">
-                  <FileText className="mx-auto mb-2 h-8 w-8 text-gray-300" />
-                  <p className="text-sm text-gray-400">
+                  <FileText className="mx-auto mb-2 h-8 w-8 text-blue-900" />
+                  <p className="text-sm text-blue-900">
                     {pick(locale, { mn: "Одоогоор CV ирээгүй байна", en: "No CVs received yet", ko: "아직 CV가 없습니다" })}
                   </p>
                 </div>
@@ -605,27 +605,27 @@ export default function PostJobPage() {
                   {apps.map((app) => (
                     <div
                       key={app.id}
-                      className="flex w-full items-center gap-3 rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 transition hover:border-blue-200 hover:bg-blue-50"
+                      className="flex w-full items-center gap-3 rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 transition hover:border-[#22c55e]/30 hover:bg-[#eef7f1]"
                     >
                       <button
                         type="button"
                         onClick={() => setSelectedApp(app)}
                         className="flex min-w-0 flex-1 items-center gap-3 text-left"
                       >
-                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-blue-600 text-xs font-bold text-white">
+                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#22c55e] text-xs font-bold text-white">
                           {app.user.name.charAt(0).toUpperCase()}
                         </div>
                         <div className="min-w-0 flex-1">
-                          <p className="truncate text-sm font-semibold text-gray-900">{app.user.name}</p>
-                          <p className="truncate text-xs text-gray-400">{app.job.title}</p>
+                          <p className="truncate text-sm font-semibold text-blue-900">{app.user.name}</p>
+                          <p className="truncate text-xs text-blue-900">{app.job.title}</p>
                         </div>
-                        <span className="shrink-0 text-xs text-gray-400">{new Date(app.createdAt).toLocaleDateString()}</span>
+                        <span className="shrink-0 text-xs text-blue-900">{new Date(app.createdAt).toLocaleDateString()}</span>
                       </button>
                       <button
                         type="button"
                         onClick={() => deleteApp(app.id)}
                         disabled={deletingAppId === app.id}
-                        className="ml-1 shrink-0 rounded-lg p-1.5 text-gray-300 transition hover:bg-red-50 hover:text-red-400 disabled:opacity-40"
+                        className="ml-1 shrink-0 rounded-lg p-1.5 text-blue-900 transition hover:bg-red-50 hover:text-red-400 disabled:opacity-40"
                         title={pick(locale, { mn: "Устгах", en: "Delete", ko: "삭제" })}
                       >
                         {deletingAppId === app.id ? <RefreshCw size={13} className="animate-spin" /> : <X size={13} />}
@@ -645,28 +645,28 @@ export default function PostJobPage() {
               </div>
             ) : jobs.length === 0 ? (
               <div className="rounded-2xl border border-dashed border-gray-300 bg-gray-50 px-6 py-14 text-center">
-                <Briefcase className="mx-auto h-10 w-10 text-gray-300" />
-                <p className="mt-4 font-semibold text-gray-900">{t.noJobs}</p>
-                <p className="mt-2 text-sm text-gray-500">{t.noJobsDescription}</p>
+                <Briefcase className="mx-auto h-10 w-10 text-blue-900" />
+                <p className="mt-4 font-semibold text-blue-900">{t.noJobs}</p>
+                <p className="mt-2 text-sm text-blue-900">{t.noJobsDescription}</p>
               </div>
             ) : (
               <div className="space-y-3">
                 {jobs.map((job) => (
-                  <article key={job.id} className="rounded-2xl border border-gray-200 p-4 transition hover:border-blue-200 hover:shadow-sm">
+                  <article key={job.id} className="rounded-2xl border border-gray-200 p-4 transition hover:border-[#22c55e]/30 hover:shadow-sm">
                     <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                       <div className="min-w-0 flex-1">
                         <div className="flex flex-wrap items-center gap-2">
-                          <Link href={`/jobs/${job.id}`} className="truncate font-semibold text-gray-900 hover:text-blue-700">
+                          <Link href={`/jobs/${job.id}`} className="truncate font-semibold text-blue-900 hover:text-[#22c55e]">
                             {job.title}
                           </Link>
-                          <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${JOB_STATUS_COLORS[job.status] || "bg-gray-100 text-gray-700"}`}>
+                          <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${JOB_STATUS_COLORS[job.status] || "bg-gray-100 text-blue-900"}`}>
                             {getJobStatusLabel(locale, job.status)}
                           </span>
                         </div>
-                        <p className="mt-1 text-xs text-gray-500">
+                        <p className="mt-1 text-xs text-blue-900">
                           {job.location} · {getJobTypeLabel(locale, job.type)} · {getCategoryLabel(locale, job.category)}
                         </p>
-                        <p className="mt-1 text-xs text-gray-400">
+                        <p className="mt-1 text-xs text-blue-900">
                           {formatDate(locale, job.createdAt)} · {job._count.applications} {t.applications}
                         </p>
                       </div>
@@ -674,7 +674,7 @@ export default function PostJobPage() {
                       <div className="flex flex-wrap items-center gap-2 sm:shrink-0">
                         <Link
                           href={`/jobs/${job.id}`}
-                          className="rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-50"
+                          className="rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-semibold text-blue-900 hover:bg-gray-50"
                         >
                           {t.view}
                         </Link>
@@ -716,33 +716,33 @@ export default function PostJobPage() {
             {/* Header */}
             <div className="flex items-center justify-between border-b border-gray-100 px-5 py-4">
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-600 text-sm font-bold text-white">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#22c55e] text-sm font-bold text-white">
                   {selectedApp.user.name.charAt(0).toUpperCase()}
                 </div>
                 <div>
-                  <p className="font-semibold text-gray-900">{selectedApp.user.name}</p>
-                  <p className="text-xs text-gray-400">{selectedApp.job.title}</p>
+                  <p className="font-semibold text-blue-900">{selectedApp.user.name}</p>
+                  <p className="text-xs text-blue-900">{selectedApp.job.title}</p>
                 </div>
               </div>
               <button onClick={() => { setSelectedApp(null); setReportingUserId(null); setReportDone(false); setReportReason(""); setReportDesc(""); }}>
-                <X size={18} className="text-gray-400 hover:text-gray-600" />
+                <X size={18} className="text-blue-900 hover:text-blue-900" />
               </button>
             </div>
 
             <div className="p-5">
               {/* Contact info */}
-              <div className="mb-4 flex flex-wrap gap-4 rounded-xl bg-gray-50 px-4 py-3 text-sm text-gray-600">
-                <span className="flex items-center gap-1.5"><Mail size={13} className="text-gray-400" />{selectedApp.user.email}</span>
-                {selectedApp.user.phone && <span className="flex items-center gap-1.5"><Phone size={13} className="text-gray-400" />{selectedApp.user.phone}</span>}
+              <div className="mb-4 flex flex-wrap gap-4 rounded-xl bg-gray-50 px-4 py-3 text-sm text-blue-900">
+                <span className="flex items-center gap-1.5"><Mail size={13} className="text-blue-900" />{selectedApp.user.email}</span>
+                {selectedApp.user.phone && <span className="flex items-center gap-1.5"><Phone size={13} className="text-blue-900" />{selectedApp.user.phone}</span>}
               </div>
 
               {/* CV content */}
               {(selectedApp.message || selectedApp.user.cvText) ? (
-                <pre className="max-h-64 overflow-y-auto whitespace-pre-wrap rounded-xl border border-gray-200 bg-gray-50 p-4 font-sans text-xs leading-relaxed text-gray-700">
+                <pre className="max-h-64 overflow-y-auto whitespace-pre-wrap rounded-xl border border-gray-200 bg-gray-50 p-4 font-sans text-xs leading-relaxed text-blue-900">
                   {selectedApp.message || selectedApp.user.cvText}
                 </pre>
               ) : (
-                <div className="flex h-24 items-center justify-center rounded-xl border border-dashed border-gray-200 text-sm text-gray-400">
+                <div className="flex h-24 items-center justify-center rounded-xl border border-dashed border-gray-200 text-sm text-blue-900">
                   {pick(locale, { mn: "CV бичигдээгүй байна", en: "No CV provided", ko: "CV 없음" })}
                 </div>
               )}
@@ -793,7 +793,7 @@ export default function PostJobPage() {
               ) : (
                 <button
                   onClick={() => setReportingUserId(selectedApp.id)}
-                  className="mt-4 flex items-center gap-1.5 text-xs text-gray-400 hover:text-red-500 transition"
+                  className="mt-4 flex items-center gap-1.5 text-xs text-blue-900 hover:text-red-500 transition"
                 >
                   <AlertTriangle size={12} />
                   {pick(locale, { mn: "Энэ хэрэглэгчид гомдол гаргах", en: "Report this user", ko: "이 사용자 신고" })}
@@ -831,15 +831,15 @@ export default function PostJobPage() {
                 /* Success state */
                 <div className="flex flex-col items-center gap-3 py-6 text-center">
                   <CheckCircle2 size={52} className="text-green-500" />
-                  <p className="text-lg font-bold text-gray-900">
+                  <p className="text-lg font-bold text-blue-900">
                     {pick(locale, { mn: "Төлбөр амжилттай!", en: "Payment successful!", ko: "결제 완료!" })}
                   </p>
-                  <p className="text-sm text-gray-400">
+                  <p className="text-sm text-blue-900">
                     {pick(locale, { mn: "Таны зар хамгийн дээр гарлаа.", en: "Your job is now boosted to the top.", ko: "공고가 상단으로 이동했습니다." })}
                   </p>
                   <button
                     onClick={closeQpay}
-                    className="mt-2 rounded-xl bg-blue-700 px-6 py-2.5 text-sm font-semibold text-white hover:bg-blue-800"
+                    className="mt-2 rounded-xl bg-[#22c55e] px-6 py-2.5 text-sm font-semibold text-white hover:bg-[#16a34a]"
                   >
                     {pick(locale, { mn: "Хаах", en: "Close", ko: "닫기" })}
                   </button>
@@ -848,7 +848,7 @@ export default function PostJobPage() {
                 /* Loading */
                 <div className="flex flex-col items-center gap-3 py-10">
                   <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#1ba5db] border-t-transparent" />
-                  <p className="text-sm text-gray-400">
+                  <p className="text-sm text-blue-900">
                     {pick(locale, { mn: "QPay нэхэмжлэл үүсгэж байна...", en: "Creating QPay invoice...", ko: "QPay 청구서 생성 중..." })}
                   </p>
                 </div>
@@ -860,19 +860,19 @@ export default function PostJobPage() {
                       // eslint-disable-next-line @next/next/no-img-element
                       <img src={qpayQrImage} alt="QPay QR" width={200} height={200} className="rounded-xl border border-gray-100 p-2" />
                     ) : (
-                      <div className="flex h-48 w-48 items-center justify-center rounded-xl bg-gray-100 text-xs text-gray-400">
+                      <div className="flex h-48 w-48 items-center justify-center rounded-xl bg-gray-100 text-xs text-blue-900">
                         QR код
                       </div>
                     )}
-                    <p className="mt-2 text-xs text-gray-400">
+                    <p className="mt-2 text-xs text-blue-900">
                       {pick(locale, { mn: "QPay апп-аар скан хийнэ үү", en: "Scan with QPay app", ko: "QPay 앱으로 스캔하세요" })}
                     </p>
                   </div>
 
                   {/* Amount */}
-                  <div className="mb-4 rounded-xl bg-blue-50 px-4 py-3 text-center">
-                    <p className="text-2xl font-extrabold text-blue-700">{qpayAmount.toLocaleString()}₮</p>
-                    <p className="text-xs text-gray-400">
+                  <div className="mb-4 rounded-xl bg-[#eef7f1] px-4 py-3 text-center">
+                    <p className="text-2xl font-extrabold text-[#22c55e]">{qpayAmount.toLocaleString()}₮</p>
+                    <p className="text-xs text-blue-900">
                       {qpayPurpose === "boost"
                         ? pick(locale, { mn: "Зарыг дээшлүүлэх", en: "Boost Job", ko: "공고 부스트" })
                         : pick(locale, { mn: "Зар оруулах", en: "Post Job", ko: "공고 등록" })}
@@ -884,7 +884,7 @@ export default function PostJobPage() {
                   <button
                     onClick={checkQpayManual}
                     disabled={qpayChecking}
-                    className="flex w-full items-center justify-center gap-2 rounded-xl border border-gray-200 py-2.5 text-sm font-semibold text-gray-600 transition hover:bg-gray-50 disabled:opacity-60"
+                    className="flex w-full items-center justify-center gap-2 rounded-xl border border-gray-200 py-2.5 text-sm font-semibold text-blue-900 transition hover:bg-gray-50 disabled:opacity-60"
                   >
                     <RefreshCw size={14} className={qpayChecking ? "animate-spin" : ""} />
                     {qpayChecking

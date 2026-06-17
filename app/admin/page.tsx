@@ -79,12 +79,12 @@ const STATUS_COLORS: Record<string, string> = {
   PENDING:  "bg-yellow-100 text-yellow-700",
   APPROVED: "bg-green-100 text-green-700",
   REJECTED: "bg-red-100 text-red-700",
-  EXPIRED:  "bg-gray-100 text-gray-500",
+  EXPIRED:  "bg-gray-100 text-blue-900",
 };
 
 const ROLE_COLORS: Record<string, string> = {
   ADMIN: "bg-purple-100 text-purple-700",
-  USER: "bg-gray-100 text-gray-600",
+  USER: "bg-gray-100 text-blue-900",
 };
 
 type Tab = "dashboard" | "users" | "jobs" | "reports" | "userReports";
@@ -233,7 +233,7 @@ export default function AdminPage() {
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gray-50">
-        <div className="h-8 w-8 rounded-full border-4 border-blue-700 border-t-transparent animate-spin" />
+        <div className="h-8 w-8 rounded-full border-4 border-[#22c55e] border-t-transparent animate-spin" />
       </div>
     );
   }
@@ -273,10 +273,10 @@ export default function AdminPage() {
       <aside className={`fixed inset-y-0 left-0 z-50 flex w-64 shrink-0 flex-col border-r border-gray-200 bg-white transition-transform duration-200 lg:static lg:z-auto lg:w-56 lg:translate-x-0 ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}`}>
         <div className="flex items-center justify-between border-b border-gray-100 p-5">
           <div>
-            <Link href="/" className="text-lg font-bold text-blue-800">Ajil Korea</Link>
-            <p className="mt-0.5 text-xs text-gray-400">{t.dashboard}</p>
+            <Link href="/" className="text-lg font-bold text-blue-900">Ajil Korea</Link>
+            <p className="mt-0.5 text-xs text-blue-900">{t.dashboard}</p>
           </div>
-          <button onClick={() => setSidebarOpen(false)} className="rounded-lg p-1 text-gray-400 hover:bg-gray-100 lg:hidden">
+          <button onClick={() => setSidebarOpen(false)} className="rounded-lg p-1 text-blue-900 hover:bg-gray-100 lg:hidden">
             <X size={18} />
           </button>
         </div>
@@ -286,7 +286,7 @@ export default function AdminPage() {
             <button
               key={item.id}
               onClick={() => { setTab(item.id); setSidebarOpen(false); }}
-              className={`w-full flex items-center gap-2 rounded-xl px-3 py-2.5 text-left text-sm transition ${tab === item.id ? "bg-blue-50 font-semibold text-blue-700" : "text-gray-600 hover:bg-gray-50"}`}
+              className={`w-full flex items-center gap-2 rounded-xl px-3 py-2.5 text-left text-sm transition ${tab === item.id ? "bg-[#eef7f1] font-semibold text-[#22c55e]" : "text-blue-900 hover:bg-gray-50"}`}
             >
               <span>{item.icon}</span>
               <span className="flex-1">{item.label}</span>
@@ -316,16 +316,16 @@ export default function AdminPage() {
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
         <header className="flex items-center justify-between border-b border-gray-200 bg-white px-4 py-4 lg:px-6">
           <div className="flex items-center gap-3">
-            <button onClick={() => setSidebarOpen(true)} className="rounded-lg p-1.5 text-gray-600 hover:bg-gray-100 lg:hidden">
+            <button onClick={() => setSidebarOpen(true)} className="rounded-lg p-1.5 text-blue-900 hover:bg-gray-100 lg:hidden">
               <Menu size={20} />
             </button>
-            <h1 className="text-lg font-bold text-gray-900">{menuItems.find((m) => m.id === tab)?.label}</h1>
+            <h1 className="text-lg font-bold text-blue-900">{menuItems.find((m) => m.id === tab)?.label}</h1>
           </div>
           <div className="flex items-center gap-3">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-600 text-sm font-bold text-white">A</div>
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#22c55e] text-sm font-bold text-white">A</div>
             <div>
-              <p className="text-sm font-semibold text-gray-800">{roleLabel("ADMIN")}</p>
-              <p className="text-xs text-gray-400">Ajil Korea</p>
+              <p className="text-sm font-semibold text-blue-900">{roleLabel("ADMIN")}</p>
+              <p className="text-xs text-blue-900">Ajil Korea</p>
             </div>
           </div>
         </header>
@@ -340,8 +340,8 @@ export default function AdminPage() {
                   {
                     label: pick(locale, { mn: "Нийт зар", en: "Total Jobs", ko: "전체 공고" }),
                     value: stats.totalJobs,
-                    icon: <Briefcase className="h-5 w-5 text-blue-700" />,
-                    color: "text-blue-700",
+                    icon: <Briefcase className="h-5 w-5 text-[#22c55e]" />,
+                    color: "text-[#22c55e]",
                     bg: "bg-white",
                   },
                   {
@@ -368,8 +368,8 @@ export default function AdminPage() {
                   {
                     label: pick(locale, { mn: "Хугацаа дууссан", en: "Expired", ko: "만료됨" }),
                     value: stats.expiredJobs,
-                    icon: <XCircle className="h-5 w-5 text-gray-400" />,
-                    color: "text-gray-500",
+                    icon: <XCircle className="h-5 w-5 text-blue-900" />,
+                    color: "text-blue-900",
                     bg: "bg-white",
                   },
                   {
@@ -397,20 +397,20 @@ export default function AdminPage() {
                   <div key={s.label} className={`rounded-2xl border ${s.bg} p-4`}>
                     <div className="mb-2">{s.icon}</div>
                     <p className={`text-2xl font-bold ${s.color}`}>{s.value.toLocaleString()}</p>
-                    <p className="mt-1 text-xs text-gray-500">{s.label}</p>
+                    <p className="mt-1 text-xs text-blue-900">{s.label}</p>
                   </div>
                 ))}
               </div>
 
               {/* Recent jobs */}
               <div className="rounded-2xl border border-gray-200 bg-white p-5">
-                <h2 className="mb-4 font-bold text-gray-900">
+                <h2 className="mb-4 font-bold text-blue-900">
                   {pick(locale, { mn: "Хянагдах зарууд", en: "Pending Review", ko: "승인 대기 공고" })}
                 </h2>
                 <div className="overflow-x-auto">
                   <table className="w-full min-w-[600px] text-sm">
                     <thead>
-                      <tr className="border-b border-gray-100 text-xs text-gray-500">
+                      <tr className="border-b border-gray-100 text-xs text-blue-900">
                         <th className="pb-3 font-medium text-left">{t.company}</th>
                         <th className="pb-3 font-medium text-left">{t.title}</th>
                         <th className="pb-3 font-medium text-left">{t.createdAt}</th>
@@ -423,18 +423,18 @@ export default function AdminPage() {
                         <tr key={job.id} className="border-b border-gray-50 hover:bg-gray-50">
                           <td className="py-3">
                             <div className="flex items-center gap-2">
-                              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-blue-100 text-xs font-bold text-blue-700">
+                              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#dcfce7] text-xs font-bold text-[#22c55e]">
                                 {job.company.name.charAt(0)}
                               </div>
-                              <span className="max-w-25 truncate text-xs text-gray-600">{job.company.name}</span>
+                              <span className="max-w-25 truncate text-xs text-blue-900">{job.company.name}</span>
                             </div>
                           </td>
                           <td className="max-w-xs py-3">
-                            <button onClick={() => openJobPreview(job.id)} className="truncate text-left text-sm font-medium text-gray-800 hover:text-blue-700 hover:underline w-full">
+                            <button onClick={() => openJobPreview(job.id)} className="truncate text-left text-sm font-medium text-blue-900 hover:text-[#22c55e] hover:underline w-full">
                               {job.title}
                             </button>
                           </td>
-                          <td className="py-3 text-xs text-gray-400">{formatDate(locale, job.createdAt)}</td>
+                          <td className="py-3 text-xs text-blue-900">{formatDate(locale, job.createdAt)}</td>
                           <td className="py-3">
                             <span className={`rounded-full px-2 py-1 text-xs ${STATUS_COLORS[job.status]}`}>
                               {getJobStatusLabel(locale, job.status)}
@@ -477,7 +477,7 @@ export default function AdminPage() {
                       ))}
                       {!stats.recentJobs?.length && (
                         <tr>
-                          <td colSpan={5} className="py-12 text-center text-gray-400">
+                          <td colSpan={5} className="py-12 text-center text-blue-900">
                             {pick(locale, { mn: "Хянагдах зар байхгүй байна", en: "No pending jobs", ko: "대기 중인 공고 없음" })}
                           </td>
                         </tr>
@@ -493,16 +493,16 @@ export default function AdminPage() {
           {tab === "users" && (
             <div className="rounded-2xl border border-gray-200 bg-white p-5">
               <div className="mb-4 flex items-center justify-between gap-4">
-                <h2 className="font-bold text-gray-900">{t.allUsers}</h2>
+                <h2 className="font-bold text-blue-900">{t.allUsers}</h2>
                 <div className="flex items-center gap-3">
                   <input
                     type="text"
                     value={userSearch}
                     onChange={(e) => setUserSearch(e.target.value)}
                     placeholder={pick(locale, { mn: "И-мэйлээр хайх...", en: "Search by email...", ko: "이메일로 검색..." })}
-                    className="rounded-lg border border-gray-200 px-3 py-1.5 text-xs text-gray-700 outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-100 w-56"
+                    className="rounded-lg border border-gray-200 px-3 py-1.5 text-xs text-blue-900 outline-none focus:border-[#22c55e] focus:ring-1 focus:ring-[#22c55e] w-56"
                   />
-                  <span className="text-xs text-gray-400 whitespace-nowrap">
+                  <span className="text-xs text-blue-900 whitespace-nowrap">
                     {users.filter(u => u.email.toLowerCase().includes(userSearch.toLowerCase())).length} {pick(locale, { mn: "хэрэглэгч", en: "users", ko: "명" })}
                   </span>
                 </div>
@@ -510,7 +510,7 @@ export default function AdminPage() {
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[600px] text-sm">
                   <thead>
-                    <tr className="border-b border-gray-100 text-xs text-gray-500">
+                    <tr className="border-b border-gray-100 text-xs text-blue-900">
                       <th className="pb-3 font-medium text-left">{pick(locale, { mn: "Нэр", en: "Name", ko: "이름" })}</th>
                       <th className="pb-3 font-medium text-left">{pick(locale, { mn: "И-мэйл", en: "Email", ko: "이메일" })}</th>
                       <th className="pb-3 font-medium text-left">{t.role}</th>
@@ -523,19 +523,19 @@ export default function AdminPage() {
                     {users.filter(u => u.email.toLowerCase().includes(userSearch.toLowerCase())).map((u) => (
                       <tr key={u.id} className={`border-b border-gray-50 hover:bg-gray-50 ${u.isBlocked ? "bg-red-50/40" : ""}`}>
                         <td className="py-3">
-                          <p className="font-medium text-gray-800">{u.name}</p>
+                          <p className="font-medium text-blue-900">{u.name}</p>
                           {u.isBlocked && (
                             <span className="mt-0.5 inline-block rounded-full bg-red-100 px-1.5 py-0.5 text-[10px] font-semibold text-red-600">
                               {pick(locale, { mn: "Блоклогдсон", en: "Blocked", ko: "차단됨" })}
                             </span>
                           )}
                         </td>
-                        <td className="py-3 text-xs text-gray-500">{u.email}</td>
+                        <td className="py-3 text-xs text-blue-900">{u.email}</td>
                         <td className="py-3">
                           <span className={`rounded-full px-2 py-1 text-xs font-medium ${ROLE_COLORS[u.role]}`}>{roleLabel(u.role)}</span>
                         </td>
-                        <td className="py-3 text-center text-xs text-gray-600">{u._count.applications}</td>
-                        <td className="py-3 text-xs text-gray-400">{formatDate(locale, u.createdAt)}</td>
+                        <td className="py-3 text-center text-xs text-blue-900">{u._count.applications}</td>
+                        <td className="py-3 text-xs text-blue-900">{formatDate(locale, u.createdAt)}</td>
                         <td className="py-3">
                           {u.role !== "ADMIN" && (
                             <button
@@ -554,7 +554,7 @@ export default function AdminPage() {
                     ))}
                     {users.filter(u => u.email.toLowerCase().includes(userSearch.toLowerCase())).length === 0 && (
                       <tr>
-                        <td colSpan={6} className="py-12 text-center text-gray-400">{t.noUsers}</td>
+                        <td colSpan={6} className="py-12 text-center text-blue-900">{t.noUsers}</td>
                       </tr>
                     )}
                   </tbody>
@@ -567,13 +567,13 @@ export default function AdminPage() {
           {tab === "jobs" && (
             <div className="rounded-2xl border border-gray-200 bg-white p-5">
               <div className="mb-4 flex items-center justify-between">
-                <h2 className="font-bold text-gray-900">{t.allJobs}</h2>
-                <span className="text-xs text-gray-400">{allJobs.length} {t.jobs}</span>
+                <h2 className="font-bold text-blue-900">{t.allJobs}</h2>
+                <span className="text-xs text-blue-900">{allJobs.length} {t.jobs}</span>
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[600px] text-sm">
                   <thead>
-                    <tr className="border-b border-gray-100 text-xs text-gray-500">
+                    <tr className="border-b border-gray-100 text-xs text-blue-900">
                       <th className="pb-3 font-medium text-left">{t.title}</th>
                       <th className="pb-3 font-medium text-left">{t.company}</th>
                       <th className="pb-3 font-medium text-left">{t.location}</th>
@@ -586,12 +586,12 @@ export default function AdminPage() {
                     {allJobs.map((job) => (
                       <tr key={job.id} className="border-b border-gray-50 hover:bg-gray-50">
                         <td className="max-w-45 py-3">
-                          <button onClick={() => setPreviewJob(job)} className="truncate text-left text-sm font-medium text-gray-800 hover:text-blue-700 hover:underline w-full">
+                          <button onClick={() => setPreviewJob(job)} className="truncate text-left text-sm font-medium text-blue-900 hover:text-[#22c55e] hover:underline w-full">
                             {job.title}
                           </button>
                         </td>
-                        <td className="py-3 text-xs text-gray-500">{job.company.name}</td>
-                        <td className="py-3 text-xs text-gray-500">{job.location}</td>
+                        <td className="py-3 text-xs text-blue-900">{job.company.name}</td>
+                        <td className="py-3 text-xs text-blue-900">{job.location}</td>
                         <td className="py-3 text-center text-xs">{job._count.applications}</td>
                         <td className="py-3">
                           <span className={`rounded-full px-2 py-1 text-xs ${STATUS_COLORS[job.status]}`}>
@@ -653,7 +653,7 @@ export default function AdminPage() {
                     ))}
                     {allJobs.length === 0 && (
                       <tr>
-                        <td colSpan={6} className="py-12 text-center text-gray-400">{t.noJobs}</td>
+                        <td colSpan={6} className="py-12 text-center text-blue-900">{t.noJobs}</td>
                       </tr>
                     )}
                   </tbody>
@@ -666,17 +666,17 @@ export default function AdminPage() {
           {tab === "reports" && (
             <div className="rounded-2xl border border-gray-200 bg-white p-5">
               <div className="mb-4 flex items-center justify-between">
-                <h2 className="font-bold text-gray-900">
+                <h2 className="font-bold text-blue-900">
                   {pick(locale, { mn: "Ирсэн гомдлууд", en: "Job Reports", ko: "신고 목록" })}
                 </h2>
-                <span className="text-xs text-gray-400">
+                <span className="text-xs text-blue-900">
                   {reports.length} {pick(locale, { mn: "гомдол", en: "reports", ko: "건" })}
                 </span>
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[600px] text-sm">
                   <thead>
-                    <tr className="border-b border-gray-100 text-xs text-gray-500">
+                    <tr className="border-b border-gray-100 text-xs text-blue-900">
                       <th className="pb-3 font-medium text-left">{pick(locale, { mn: "Зар", en: "Job", ko: "공고" })}</th>
                       <th className="pb-3 font-medium text-left">{pick(locale, { mn: "Мэдэгдсэн", en: "Reported by", ko: "신고자" })}</th>
                       <th className="pb-3 font-medium text-left">{pick(locale, { mn: "Шалтгаан", en: "Reason", ko: "이유" })}</th>
@@ -691,24 +691,24 @@ export default function AdminPage() {
                         <td className="py-3">
                           <button
                             onClick={() => openJobPreview(r.job.id)}
-                            className="max-w-35 truncate text-left text-sm font-medium text-blue-700 hover:underline block"
+                            className="max-w-35 truncate text-left text-sm font-medium text-[#22c55e] hover:underline block"
                           >
                             {r.job.title}
                           </button>
-                          <p className="text-xs text-gray-400">{r.job.company.name}</p>
+                          <p className="text-xs text-blue-900">{r.job.company.name}</p>
                         </td>
-                        <td className="py-3 text-xs text-gray-600">
+                        <td className="py-3 text-xs text-blue-900">
                           <p className="font-medium">{r.user.name}</p>
-                          <p className="text-gray-400">{r.user.email}</p>
+                          <p className="text-blue-900">{r.user.email}</p>
                         </td>
                         <td className="py-3">
                           <span className="rounded-full bg-orange-100 px-2 py-0.5 text-xs text-orange-700">{r.reason}</span>
                         </td>
-                        <td className="max-w-[200px] py-3 text-xs text-gray-500">
+                        <td className="max-w-[200px] py-3 text-xs text-blue-900">
                           <span className="line-clamp-2">{r.description || "—"}</span>
                         </td>
                         <td className="py-3">
-                          <span className={`rounded-full px-2 py-1 text-xs ${r.status === "OPEN" ? "bg-orange-100 text-orange-700" : "bg-gray-100 text-gray-500"}`}>
+                          <span className={`rounded-full px-2 py-1 text-xs ${r.status === "OPEN" ? "bg-orange-100 text-orange-700" : "bg-gray-100 text-blue-900"}`}>
                             {r.status === "OPEN"
                               ? pick(locale, { mn: "Нээлттэй", en: "Open", ko: "미처리" })
                               : pick(locale, { mn: "Хаасан", en: "Closed", ko: "처리완료" })}
@@ -720,7 +720,7 @@ export default function AdminPage() {
                               <button
                                 onClick={() => updateReportStatus(r.id, "CLOSED")}
                                 disabled={dismissing === r.id}
-                                className="rounded-lg border border-gray-200 px-2 py-1 text-xs text-gray-600 hover:bg-gray-50 disabled:opacity-60"
+                                className="rounded-lg border border-gray-200 px-2 py-1 text-xs text-blue-900 hover:bg-gray-50 disabled:opacity-60"
                               >
                                 {dismissing === r.id ? "..." : pick(locale, { mn: "Хаах", en: "Dismiss", ko: "닫기" })}
                               </button>
@@ -747,7 +747,7 @@ export default function AdminPage() {
                     ))}
                     {reports.length === 0 && (
                       <tr>
-                        <td colSpan={6} className="py-12 text-center text-gray-400">
+                        <td colSpan={6} className="py-12 text-center text-blue-900">
                           {pick(locale, { mn: "Гомдол байхгүй", en: "No reports", ko: "신고 없음" })}
                         </td>
                       </tr>
@@ -762,17 +762,17 @@ export default function AdminPage() {
           {tab === "userReports" && (
             <div className="rounded-2xl border border-gray-200 bg-white p-5">
               <div className="mb-4 flex items-center justify-between">
-                <h2 className="font-bold text-gray-900">
+                <h2 className="font-bold text-blue-900">
                   {pick(locale, { mn: "Хэрэглэгчийн гомдлууд", en: "User Reports", ko: "사용자 신고 목록" })}
                 </h2>
-                <span className="text-xs text-gray-400">
+                <span className="text-xs text-blue-900">
                   {userReports.length} {pick(locale, { mn: "гомдол", en: "reports", ko: "건" })}
                 </span>
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[600px] text-sm">
                   <thead>
-                    <tr className="border-b border-gray-100 text-xs text-gray-500">
+                    <tr className="border-b border-gray-100 text-xs text-blue-900">
                       <th className="pb-3 font-medium text-left">{pick(locale, { mn: "Гомдол гаргагч", en: "Reported by", ko: "신고자" })}</th>
                       <th className="pb-3 font-medium text-left">{pick(locale, { mn: "Гомдол гарсан хэрэглэгч", en: "Reported user", ko: "신고된 사용자" })}</th>
                       <th className="pb-3 font-medium text-left">{pick(locale, { mn: "Шалтгаан", en: "Reason", ko: "이유" })}</th>
@@ -784,13 +784,13 @@ export default function AdminPage() {
                   <tbody>
                     {userReports.map((r) => (
                       <tr key={r.id} className="border-b border-gray-50 hover:bg-gray-50">
-                        <td className="py-3 text-xs text-gray-600">
+                        <td className="py-3 text-xs text-blue-900">
                           <p className="font-medium">{r.reporter.name}</p>
-                          <p className="text-gray-400">{r.reporter.email}</p>
+                          <p className="text-blue-900">{r.reporter.email}</p>
                         </td>
                         <td className="py-3">
-                          <p className="text-sm font-medium text-gray-800">{r.reportedUser.name}</p>
-                          <p className="text-xs text-gray-400">{r.reportedUser.email}</p>
+                          <p className="text-sm font-medium text-blue-900">{r.reportedUser.name}</p>
+                          <p className="text-xs text-blue-900">{r.reportedUser.email}</p>
                           {r.reportedUser.isBlocked && (
                             <span className="mt-0.5 inline-block rounded-full bg-red-100 px-1.5 py-0.5 text-[10px] font-semibold text-red-600">
                               {pick(locale, { mn: "Блоклогдсон", en: "Blocked", ko: "차단됨" })}
@@ -800,11 +800,11 @@ export default function AdminPage() {
                         <td className="py-3">
                           <span className="rounded-full bg-orange-100 px-2 py-0.5 text-xs text-orange-700">{r.reason}</span>
                         </td>
-                        <td className="max-w-45 py-3 text-xs text-gray-500">
+                        <td className="max-w-45 py-3 text-xs text-blue-900">
                           <span className="line-clamp-2">{r.description || "—"}</span>
                         </td>
                         <td className="py-3">
-                          <span className={`rounded-full px-2 py-1 text-xs ${r.status === "OPEN" ? "bg-orange-100 text-orange-700" : "bg-gray-100 text-gray-500"}`}>
+                          <span className={`rounded-full px-2 py-1 text-xs ${r.status === "OPEN" ? "bg-orange-100 text-orange-700" : "bg-gray-100 text-blue-900"}`}>
                             {r.status === "OPEN"
                               ? pick(locale, { mn: "Нээлттэй", en: "Open", ko: "미처리" })
                               : pick(locale, { mn: "Хаасан", en: "Closed", ko: "처리완료" })}
@@ -816,7 +816,7 @@ export default function AdminPage() {
                               <button
                                 onClick={() => updateUserReportStatus(r.id, "CLOSED")}
                                 disabled={dismissing === r.id}
-                                className="rounded-lg border border-gray-200 px-2 py-1 text-xs text-gray-600 hover:bg-gray-50 disabled:opacity-60"
+                                className="rounded-lg border border-gray-200 px-2 py-1 text-xs text-blue-900 hover:bg-gray-50 disabled:opacity-60"
                               >
                                 {dismissing === r.id ? "..." : pick(locale, { mn: "Хаах", en: "Dismiss", ko: "닫기" })}
                               </button>
@@ -852,7 +852,7 @@ export default function AdminPage() {
                     ))}
                     {userReports.length === 0 && (
                       <tr>
-                        <td colSpan={6} className="py-12 text-center text-gray-400">
+                        <td colSpan={6} className="py-12 text-center text-blue-900">
                           {pick(locale, { mn: "Гомдол байхгүй", en: "No user reports", ko: "신고 없음" })}
                         </td>
                       </tr>
@@ -883,10 +883,10 @@ export default function AdminPage() {
                     </span>
                   )}
                 </div>
-                <h2 className="text-xl font-bold text-gray-900">{previewJob.title}</h2>
-                <p className="mt-0.5 text-sm text-gray-500">{previewJob.company.name} · {previewJob.location}</p>
+                <h2 className="text-xl font-bold text-blue-900">{previewJob.title}</h2>
+                <p className="mt-0.5 text-sm text-blue-900">{previewJob.company.name} · {previewJob.location}</p>
               </div>
-              <button onClick={() => setPreviewJob(null)} className="ml-4 rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600">
+              <button onClick={() => setPreviewJob(null)} className="ml-4 rounded-lg p-1.5 text-blue-900 hover:bg-gray-100 hover:text-blue-900">
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
               </button>
             </div>
@@ -911,37 +911,37 @@ export default function AdminPage() {
 
               {/* Description */}
               <div>
-                <p className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-gray-400">
+                <p className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-blue-900">
                   {pick(locale, { mn: "Тайлбар", en: "Description", ko: "설명" })}
                 </p>
-                <p className="whitespace-pre-wrap text-sm leading-relaxed text-gray-700">{previewJob.description}</p>
+                <p className="whitespace-pre-wrap text-sm leading-relaxed text-blue-900">{previewJob.description}</p>
               </div>
 
               {previewJob.requirements && (
                 <div>
-                  <p className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-gray-400">
+                  <p className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-blue-900">
                     {pick(locale, { mn: "Шаардлага", en: "Requirements", ko: "자격요건" })}
                   </p>
-                  <p className="whitespace-pre-wrap text-sm leading-relaxed text-gray-700">{previewJob.requirements}</p>
+                  <p className="whitespace-pre-wrap text-sm leading-relaxed text-blue-900">{previewJob.requirements}</p>
                 </div>
               )}
 
               {previewJob.benefits && (
                 <div>
-                  <p className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-gray-400">
+                  <p className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-blue-900">
                     {pick(locale, { mn: "Давуу тал", en: "Benefits", ko: "혜택" })}
                   </p>
-                  <p className="whitespace-pre-wrap text-sm leading-relaxed text-gray-700">{previewJob.benefits}</p>
+                  <p className="whitespace-pre-wrap text-sm leading-relaxed text-blue-900">{previewJob.benefits}</p>
                 </div>
               )}
 
               {/* Contact */}
               {(previewJob.recruiterName || previewJob.phoneNumber || previewJob.kakaoId) && (
                 <div className="rounded-xl border border-gray-100 bg-gray-50 px-4 py-3 text-sm">
-                  <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-400">
+                  <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-blue-900">
                     {pick(locale, { mn: "Холбоо барих", en: "Contact", ko: "연락처" })}
                   </p>
-                  <div className="space-y-1 text-gray-700">
+                  <div className="space-y-1 text-blue-900">
                     {previewJob.recruiterName && <p>{pick(locale, { mn: "Нэр", en: "Name", ko: "이름" })}: {previewJob.recruiterName}</p>}
                     {previewJob.phoneNumber && <p>{pick(locale, { mn: "Утас", en: "Phone", ko: "전화" })}: {previewJob.phoneNumber}</p>}
                     {previewJob.kakaoId && <p>KakaoTalk: {previewJob.kakaoId}</p>}
@@ -952,7 +952,7 @@ export default function AdminPage() {
 
             {/* Footer actions */}
             <div className="flex flex-col gap-3 border-t border-gray-100 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
-              <p className="text-xs text-gray-400">{formatDate(locale, previewJob.createdAt)}</p>
+              <p className="text-xs text-blue-900">{formatDate(locale, previewJob.createdAt)}</p>
               <div className="flex flex-wrap gap-2">
                 {(previewJob.status === "PENDING" || previewJob.status === "REJECTED" || previewJob.status === "EXPIRED") && (
                   <button
@@ -979,7 +979,7 @@ export default function AdminPage() {
                 >
                   {deleting === previewJob.id ? "..." : pick(locale, { mn: "Устгах", en: "Delete", ko: "삭제" })}
                 </button>
-                <button onClick={() => setPreviewJob(null)} className="rounded-xl border border-gray-200 px-4 py-2 text-sm text-gray-600 hover:bg-gray-50">
+                <button onClick={() => setPreviewJob(null)} className="rounded-xl border border-gray-200 px-4 py-2 text-sm text-blue-900 hover:bg-gray-50">
                   {pick(locale, { mn: "Хаах", en: "Close", ko: "닫기" })}
                 </button>
               </div>

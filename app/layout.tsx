@@ -5,7 +5,7 @@ import { LanguageProvider } from "@/components/LanguageProvider";
 import { getLocale } from "@/lib/i18n-server";
 import { pick } from "@/lib/i18n";
 
-const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({ subsets: ["latin", "cyrillic"] });
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL ?? "https://ajilkorea.com";
 
