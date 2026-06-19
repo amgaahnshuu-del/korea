@@ -17,7 +17,7 @@ export default function LanguageSwitcher({ className = "" }: { className?: strin
             type="button"
             onClick={() => setLocale(option.code as Locale)}
             className={`rounded-full px-3 py-1.5 transition ${
-              active ? "bg-blue-700 text-white shadow-sm" : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+              active ? "bg-[#22c55e] text-white shadow-sm" : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
             }`}
             aria-pressed={active}
             aria-label={option.label}

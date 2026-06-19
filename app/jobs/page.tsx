@@ -14,7 +14,6 @@ const CATEGORY_KEYS = [
   "Manufacturing", "IT & Tech", "Food & Beverage", "Construction",
   "Logistics", "Healthcare", "Agriculture", "Service & Sales",
 ];
-const VISA_TYPES = ["E-9", "E-7", "D-2", "H-2", "F-4"];
 
 interface Job {
   id: string; title: string; location: string; type: string; category: string;
@@ -36,7 +35,6 @@ function JobsContent() {
   const [category, setCategory] = useState(searchParams.get("category") ?? "");
   const [type, setType] = useState(searchParams.get("type") ?? "");
   const [location, setLocation] = useState(searchParams.get("location") ?? "");
-  const [visa, setVisa] = useState("");
   const [salaryMin, setSalaryMin] = useState("");
   const [salaryMax, setSalaryMax] = useState("");
   const [view, setView] = useState<"list" | "grid">("list");
@@ -58,7 +56,6 @@ function JobsContent() {
     if (category) params.set("category", category);
     if (type)     params.set("type", type);
     if (location) params.set("location", location);
-    if (visa)     params.set("q", (q ? q + " " : "") + visa);
     if (salaryMin) params.set("salaryMin", salaryMin);
     if (salaryMax) params.set("salaryMax", salaryMax);
 
@@ -68,13 +65,13 @@ function JobsContent() {
     setTotal(data.total || 0);
     setPages(data.pages || 1);
     setLoading(false);
-  }, [page, q, category, type, location, visa, salaryMin, salaryMax]);
+  }, [page, q, category, type, location, salaryMin, salaryMax]);
 
   useEffect(() => { fetchJobs(); }, [fetchJobs]);
 
-  const resetFilters = () => { setQ(""); setCategory(""); setType(""); setLocation(""); setVisa(""); setSalaryMin(""); setSalaryMax(""); setPage(1); };
+  const resetFilters = () => { setQ(""); setCategory(""); setType(""); setLocation(""); setSalaryMin(""); setSalaryMax(""); setPage(1); };
 
-  const activeFiltersCount = [category, type, location, visa, salaryMin, salaryMax].filter(Boolean).length;
+  const activeFiltersCount = [category, type, location, salaryMin, salaryMax].filter(Boolean).length;
 
   const FilterPanel = () => (
     <div className="rounded-2xl border border-gray-200 bg-white p-5">
@@ -115,16 +112,6 @@ function JobsContent() {
             <label key={jobType} className="flex cursor-pointer items-center gap-2 text-sm">
               <input type="radio" name="type" checked={type === jobType} onChange={() => { setType(jobType); setPage(1); }} className="accent-[#22c55e]" /><span>{getJobTypeLabel(locale, jobType)}</span>
             </label>
-          ))}
-        </div>
-      </div>
-
-      {/* Visa Type */}
-      <div className="mb-5">
-        <h4 className="mb-3 text-xs font-semibold uppercase tracking-wide text-blue-900">{pick(locale, { mn: "Визний төрөл", en: "Visa Type", ko: "비자 유형" })}</h4>
-        <div className="flex flex-wrap gap-2">
-          {VISA_TYPES.map((v) => (
-            <button key={v} onClick={() => { setVisa(visa === v ? "" : v); setPage(1); }} className={`rounded-full px-3 py-1 text-xs font-medium transition ${visa === v ? "bg-[#22c55e] text-white" : "border border-gray-200 text-blue-900 hover:bg-gray-50"}`}>{v}</button>
           ))}
         </div>
       </div>

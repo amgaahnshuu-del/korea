@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { Globe, Mail, MapPin, Phone } from "lucide-react";
 import { pick } from "@/lib/i18n";
 import { useLanguage } from "@/components/LanguageProvider";
@@ -67,9 +68,9 @@ export default function Footer() {
   ];
 
   const copyright = pick(locale, {
-    mn: "© 2024 Mongol Connect. Бүх эрх хуулиар хамгаалагдсан.",
-    en: "© 2024 Mongol Connect. All rights reserved.",
-    ko: "© 2024 Mongol Connect. 모든 권리 보유.",
+    mn: "© 2026 Mongol Connect. Бүх эрх хуулиар хамгаалагдсан.",
+    en: "© 2026 Mongol Connect. All rights reserved.",
+    ko: "© 2026 Mongol Connect. 모든 권리 보유.",
   });
 
   return (
@@ -79,10 +80,8 @@ export default function Footer() {
 
           {/* Column 1 — Brand */}
           <div>
-            <Link href="/" className="mb-5 flex items-center gap-2.5">
-              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#22c55e]/15">
-                <Globe className="h-5 w-5 text-[#22c55e]" />
-              </div>
+            <Link href="/" className="mb-5 flex items-center gap-3">
+              <Image src="/logo.png" alt="Ajil Korea" width={48} height={48} className="shrink-0" />
               <div className="leading-tight">
                 <span className="block text-[13px] font-extrabold tracking-widest text-white">MONGOL</span>
                 <span className="block text-[13px] font-extrabold tracking-widest text-[#22c55e]">CONNECT</span>
@@ -162,19 +161,19 @@ export default function Footer() {
               </li>
               <li className="flex items-center gap-2.5">
                 <Phone size={15} className="shrink-0 text-[#22c55e]" />
-                <a href="tel:+97611123456" className="text-sm text-white/60 transition hover:text-[#4ade80]">
-                  +976 11 123456
+                <a href="tel:+97677487474" className="text-sm text-white/60 transition hover:text-[#4ade80]">
+                  +976 77487474
                 </a>
               </li>
               <li className="flex items-center gap-2.5">
                 <Mail size={15} className="shrink-0 text-[#22c55e]" />
-                <a href="mailto:info@mongolconnect.mn" className="text-sm text-white/60 transition hover:text-[#4ade80]">
-                  info@mongolconnect.mn
+                <a href="mailto:mgl.gymhub@gmail.com" className="text-sm text-white/60 transition hover:text-[#4ade80]">
+                  mgl.gymhub@gmail.com
                 </a>
               </li>
               <li className="flex items-center gap-2.5">
                 <Globe size={15} className="shrink-0 text-[#22c55e]" />
-                <a href="#" className="text-sm text-white/60 transition hover:text-[#4ade80]">
+                <a href="https://www.mongolconnect.mn" target="_blank" rel="noopener noreferrer" className="text-sm text-white/60 transition hover:text-[#4ade80]">
                   www.mongolconnect.mn
                 </a>
               </li>

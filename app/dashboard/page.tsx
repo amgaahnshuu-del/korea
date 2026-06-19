@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, type ReactNode } from "react";
+import { useState, useEffect, useRef, type ReactNode } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
@@ -29,6 +29,44 @@ interface SavedJob {
 interface Notif { id: string; title: string; message: string; isRead: boolean; createdAt: string }
 
 type Tab = "cv" | "mycv" | "saved" | "notifications" | "settings";
+
+function GenderSelect({ value, onChange, options }: { value: string; onChange: (v: string) => void; options: { value: string; label: string }[] }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  const selected = options.find((o) => o.value === value) ?? options[0];
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false); };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        className={`flex w-full items-center justify-between rounded-xl border px-4 py-2.5 text-sm transition-colors ${open ? "border-[#22c55e] ring-1 ring-[#22c55e]/30" : "border-gray-200"} bg-white text-gray-800`}
+      >
+        <span className={value === "" ? "text-gray-400" : ""}>{selected.label}</span>
+        <svg className={`h-4 w-4 text-gray-400 transition-transform ${open ? "rotate-180" : ""}`} viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clipRule="evenodd" /></svg>
+      </button>
+      {open && (
+        <ul className="absolute z-20 mt-1 w-full overflow-hidden rounded-xl border border-gray-100 bg-white shadow-lg">
+          {options.map((opt) => (
+            <li
+              key={opt.value}
+              onClick={() => { onChange(opt.value); setOpen(false); }}
+              className={`cursor-pointer px-4 py-2.5 text-sm transition-colors ${value === opt.value ? "bg-[#22c55e] font-semibold text-white" : "text-gray-700 hover:bg-[#22c55e]/10 hover:text-[#16a34a]"}`}
+            >
+              {opt.label}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -317,11 +355,15 @@ export default function DashboardPage() {
                   ))}
                   <div>
                     <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-blue-900">{pick(locale, { mn: "Хүйс", en: "Gender", ko: "성별" })}</label>
-                    <select value={cvFormData.gender} onChange={(e) => setCvFormData({ ...cvFormData, gender: e.target.value })} className="w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm outline-none focus:border-[#22c55e]">
-                      <option value="">{pick(locale, { mn: "Сонгох", en: "Select", ko: "선택" })}</option>
-                      <option value="Эрэгтэй">{pick(locale, { mn: "Эрэгтэй", en: "Male", ko: "남성" })}</option>
-                      <option value="Эмэгтэй">{pick(locale, { mn: "Эмэгтэй", en: "Female", ko: "여성" })}</option>
-                    </select>
+                    <GenderSelect
+                      value={cvFormData.gender}
+                      onChange={(v) => setCvFormData({ ...cvFormData, gender: v })}
+                      options={[
+                        { value: "",         label: pick(locale, { mn: "Сонгох",   en: "Select", ko: "선택" }) },
+                        { value: "Эрэгтэй",  label: pick(locale, { mn: "Эрэгтэй", en: "Male",   ko: "남성" }) },
+                        { value: "Эмэгтэй",  label: pick(locale, { mn: "Эмэгтэй", en: "Female", ko: "여성" }) },
+                      ]}
+                    />
                   </div>
                 </div>
 
