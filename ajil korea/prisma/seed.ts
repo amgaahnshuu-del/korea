@@ -49,6 +49,7 @@ async function main() {
       title: 'Factory Production Worker',
       company: 'Samsung Electronics',
       location: 'Suwon, South Korea',
+      category: 'Manufacturing',
       description: `We are looking for dedicated production workers to join our manufacturing team at Samsung Electronics in Suwon, South Korea.
 
 Responsibilities:
@@ -78,6 +79,7 @@ Benefits:
       title: 'Korean Restaurant Kitchen Staff',
       company: 'Arirang Restaurant Group',
       location: 'Seoul, South Korea',
+      category: 'Hospitality',
       description: `Arirang Restaurant Group is hiring experienced kitchen staff for our busy restaurant locations across Seoul.
 
 Responsibilities:
@@ -104,6 +106,7 @@ Benefits:
       title: 'Agricultural Worker - Greenhouse',
       company: 'Korea Farm Co.',
       location: 'Chungnam, South Korea',
+      category: 'Agriculture',
       description: `Korea Farm Co. is seeking hardworking agricultural workers for our greenhouse operations in Chungnam province.
 
 Responsibilities:
@@ -131,6 +134,7 @@ Benefits:
       title: 'IT Software Developer',
       company: 'MonTech Solutions',
       location: 'Ulaanbaatar, Mongolia',
+      category: 'Technology',
       description: `MonTech Solutions, a leading tech company in Mongolia, is looking for a skilled software developer to join our growing team.
 
 Responsibilities:
@@ -159,6 +163,7 @@ Benefits:
       title: 'Construction Worker',
       company: 'Hyundai Engineering & Construction',
       location: 'Incheon, South Korea',
+      category: 'Construction',
       description: `Hyundai Engineering & Construction is hiring skilled construction workers for major infrastructure projects in Incheon.
 
 Responsibilities:
@@ -186,6 +191,7 @@ Benefits:
       title: 'Cleaning & Maintenance Staff',
       company: 'Seoul Grand Hotel',
       location: 'Seoul, South Korea',
+      category: 'Hospitality',
       description: `Seoul Grand Hotel, a 5-star luxury hotel in central Seoul, is looking for dedicated cleaning and maintenance staff.
 
 Responsibilities:
@@ -213,6 +219,7 @@ Benefits:
       title: 'Welding Technician',
       company: 'POSCO Steel',
       location: 'Pohang, South Korea',
+      category: 'Manufacturing',
       description: `POSCO, one of the world's largest steel producers, is seeking qualified welding technicians for our facility in Pohang.
 
 Responsibilities:
@@ -241,6 +248,7 @@ Benefits:
       title: 'Customer Service Representative (Remote)',
       company: 'GoGlobal Mongolia',
       location: 'Remote / Mongolia',
+      category: 'Service',
       description: `GoGlobal Mongolia is expanding and looking for customer service representatives to work remotely from anywhere in Mongolia.
 
 Responsibilities:
@@ -268,6 +276,7 @@ Benefits:
       title: 'Seafood Processing Worker',
       company: 'Busan Fisheries Co.',
       location: 'Busan, South Korea',
+      category: 'Manufacturing',
       description: `Busan Fisheries Co. is one of Korea's largest seafood processing companies. We are hiring workers for our modern processing facility in Busan.
 
 Responsibilities:
@@ -296,6 +305,7 @@ Benefits:
       title: 'Part-time Convenience Store Staff',
       company: 'CU Convenience Store',
       location: 'Gyeonggi, South Korea',
+      category: 'Retail',
       description: `CU, Korea's largest convenience store chain, is hiring part-time staff for multiple locations in Gyeonggi province.
 
 Responsibilities:
@@ -321,6 +331,7 @@ Benefits:
       title: 'Graphic Designer',
       company: 'Creative UB Studio',
       location: 'Ulaanbaatar, Mongolia',
+      category: 'Creative',
       description: `Creative UB Studio, a leading design agency in Mongolia, is looking for a talented graphic designer to join our creative team.
 
 Responsibilities:
@@ -348,6 +359,7 @@ Benefits:
       title: 'Security Guard',
       company: 'Korea Security Services',
       location: 'Seoul, South Korea',
+      category: 'Security',
       description: `Korea Security Services is hiring security guards for various commercial and residential locations throughout Seoul.
 
 Responsibilities:
