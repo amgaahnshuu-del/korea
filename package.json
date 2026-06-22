@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "build": "cd \"ajil korea\" && npm install && npm run build",
+    "build": "cd \"ajil korea\" && npm install && npm run build && cp -r .next ../",
     "dev": "cd \"ajil korea\" && npm run dev",
     "start": "cd \"ajil korea\" && npm start"
   },
