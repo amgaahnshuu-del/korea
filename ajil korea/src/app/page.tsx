@@ -2,22 +2,32 @@ import Link from 'next/link'
 import prisma from '@/lib/prisma'
 import JobCard from '@/components/JobCard'
 
+export const dynamic = 'force-dynamic'
+
 async function getFeaturedJobs() {
-  return prisma.job.findMany({
-    where: { active: true },
-    orderBy: { createdAt: 'desc' },
-    take: 6,
-    include: { _count: { select: { applications: true } } },
-  })
+  try {
+    return await prisma.job.findMany({
+      where: { active: true },
+      orderBy: { createdAt: 'desc' },
+      take: 6,
+      include: { _count: { select: { applications: true } } },
+    })
+  } catch {
+    return []
+  }
 }
 
 async function getStats() {
-  const [totalJobs, totalUsers, totalApps] = await Promise.all([
-    prisma.job.count({ where: { active: true } }),
-    prisma.user.count(),
-    prisma.application.count(),
-  ])
-  return { totalJobs, totalUsers, totalApps }
+  try {
+    const [totalJobs, totalUsers, totalApps] = await Promise.all([
+      prisma.job.count({ where: { active: true } }),
+      prisma.user.count(),
+      prisma.application.count(),
+    ])
+    return { totalJobs, totalUsers, totalApps }
+  } catch {
+    return { totalJobs: 0, totalUsers: 0, totalApps: 0 }
+  }
 }
 
 export default async function HomePage() {
