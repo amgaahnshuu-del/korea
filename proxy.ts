@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const PUBLIC_PATHS = new Set(["/", "/about", "/contact", "/login", "/register", "/forgot-password", "/reset-password"]);
+const PUBLIC_PATHS = new Set(["/", "/about", "/contact", "/login", "/register", "/forgot-password", "/reset-password", "/jobs"]);
 const PUBLIC_PREFIXES = ["/api/auth", "/_next"];
 const FILE_EXTENSION_RE = /\.[^/]+$/;
 
@@ -60,13 +60,21 @@ async function verifyToken(token: string): Promise<boolean> {
   }
 }
 
+function isPublicJobsDetailPath(pathname: string): boolean {
+  if (!pathname.startsWith("/jobs/")) return false;
+
+  const segments = pathname.split("/").filter(Boolean);
+  return segments.length === 2 && segments[0] === "jobs" && segments[1] !== "post";
+}
 export async function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
+  const normalizedPathname = pathname !== "/" ? pathname.replace(/\/+$/, "") : pathname;
 
-  if (PUBLIC_PATHS.has(pathname)) return NextResponse.next();
-  if (PUBLIC_PREFIXES.some((prefix) => pathname.startsWith(prefix))) return NextResponse.next();
-  if (pathname.startsWith("/favicon.ico")) return NextResponse.next();
-  if (FILE_EXTENSION_RE.test(pathname)) return NextResponse.next();
+  if (PUBLIC_PATHS.has(normalizedPathname)) return NextResponse.next();
+  if (isPublicJobsDetailPath(normalizedPathname)) return NextResponse.next();
+  if (PUBLIC_PREFIXES.some((prefix) => normalizedPathname.startsWith(prefix))) return NextResponse.next();
+  if (normalizedPathname.startsWith("/favicon.ico")) return NextResponse.next();
+  if (FILE_EXTENSION_RE.test(normalizedPathname)) return NextResponse.next();
 
   const token = req.cookies.get("token")?.value;
   if (!token || !(await verifyToken(token))) {

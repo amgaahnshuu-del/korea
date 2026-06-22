@@ -3,9 +3,18 @@ import { prisma } from "@/lib/prisma";
 import { signToken } from "@/lib/jwt";
 import crypto from "crypto";
 
+function sanitizeNextPath(next: string | null) {
+  if (!next) return "";
+  if (!next.startsWith("/") || next.startsWith("//")) return "";
+  if (next.startsWith("/api/") || next.startsWith("/_next/")) return "";
+  if (next === "/login") return "";
+  return next;
+}
+
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const code = searchParams.get("code");
+  const nextPath = sanitizeNextPath(searchParams.get("state"));
   const appUrl = process.env.NEXT_PUBLIC_APP_URL!;
 
   if (!code) {
@@ -60,8 +69,9 @@ export async function GET(req: NextRequest) {
     }
 
     const token = signToken({ id: user.id, email: user.email, role: user.role, name: user.name });
+    const destination = nextPath || (user.role === "ADMIN" ? "/admin" : "/jobs");
 
-    const response = NextResponse.redirect(`${appUrl}${user.role === "ADMIN" ? "/admin" : "/jobs"}`);
+    const response = NextResponse.redirect(`${appUrl}${destination}`);
     response.cookies.set("token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",

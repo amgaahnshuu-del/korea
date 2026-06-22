@@ -3,8 +3,9 @@
 import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Briefcase, X, RefreshCw, CheckCircle2, Zap, FileText, Mail, Phone, AlertTriangle } from "lucide-react";
+import { Briefcase, X, RefreshCw, CheckCircle2, Zap, FileText, Mail, Phone, AlertTriangle, Loader2, MapPin, Search } from "lucide-react";
 import Navbar from "@/components/Navbar";
+import OpenStreetMapPicker from "@/components/OpenStreetMapPicker";
 import { formatDate, getCategoryLabel, getJobStatusLabel, getJobTypeLabel, getTranslation, pick } from "@/lib/i18n";
 import { useLanguage } from "@/components/LanguageProvider";
 
@@ -44,6 +45,14 @@ type JobForm = {
   kakaoId: string;
 };
 
+type OSMResult = {
+  placeId: number;
+  displayName: string;
+  lat: string;
+  lon: string;
+  address: Record<string, string | undefined>;
+};
+
 interface ReceivedApp {
   id: string;
   message: string | null;
@@ -80,6 +89,26 @@ const createEmptyForm = (): JobForm => ({
   kakaoId: "",
 });
 
+const SEOUL_CENTER = { lat: 37.5665, lon: 126.978 };
+function formatLocationChoice(result: OSMResult) {
+  const address = result.address ?? {};
+  const parts = [
+    address.road ? address.road : "",
+    address.city_district ||
+      address.suburb ||
+      address.city ||
+      address.town ||
+      address.village ||
+      address.municipality ||
+      address.county ||
+      "",
+    address.state || "",
+    address.country || "",
+  ].filter(Boolean);
+
+  return parts.length > 0 ? parts.join(", ") : result.displayName;
+}
+
 export default function PostJobPage() {
   const router = useRouter();
   const { locale } = useLanguage();
@@ -93,6 +122,12 @@ export default function PostJobPage() {
   const [success, setSuccess] = useState("");
   const [jobs, setJobs] = useState<PostedJob[]>([]);
   const [form, setForm] = useState<JobForm>(createEmptyForm);
+  const [locationQuery, setLocationQuery] = useState("");
+  const [locationResults, setLocationResults] = useState<OSMResult[]>([]);
+  const [locationLoading, setLocationLoading] = useState(false);
+  const [locationReverseLoading, setLocationReverseLoading] = useState(false);
+  const [locationError, setLocationError] = useState("");
+  const [selectedLocation, setSelectedLocation] = useState<OSMResult | null>(null);
   const [apps, setApps] = useState<ReceivedApp[]>([]);
   const [selectedApp, setSelectedApp] = useState<ReceivedApp | null>(null);
   const [deletingAppId, setDeletingAppId] = useState<string | null>(null);
@@ -116,6 +151,124 @@ export default function PostJobPage() {
   const [qpayPurpose, setQpayPurpose] = useState<"boost" | "post">("boost");
   const [qpayPendingForm, setQpayPendingForm] = useState<JobForm | null>(null);
   const qpayPollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const clearLocationSelection = useCallback(() => {
+    setSelectedLocation(null);
+  }, []);
+
+  const resetLocationPicker = useCallback(() => {
+    setLocationQuery("");
+    setLocationResults([]);
+    setLocationLoading(false);
+    setLocationError("");
+    setSelectedLocation(null);
+  }, []);
+
+  const searchLocations = useCallback(
+    async (query: string) => {
+      const trimmed = query.trim();
+      if (trimmed.length < 2) {
+        setLocationError(
+          pick(locale, {
+            mn: "Хайлт хийхийн тулд дор хаяж 2 тэмдэгт оруулна уу.",
+            en: "Enter at least 2 characters to search.",
+            ko: "검색하려면 2자 이상 입력하세요.",
+          }),
+        );
+        setLocationResults([]);
+        return;
+      }
+
+      setLocationLoading(true);
+      setLocationError("");
+
+      try {
+        const res = await fetch(`/api/locations/search?q=${encodeURIComponent(trimmed)}&locale=${locale}&limit=5`);
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data?.error || "search_failed");
+        }
+
+        setLocationResults(data.results || []);
+
+        if (!data.results?.length) {
+          setLocationError(
+            pick(locale, {
+              mn: "Тааарсан байршил олдсонгүй. Өөр хот, дүүрэг, эсвэл landmark оруулж үзнэ үү.",
+              en: "No matching places found. Try another city, district, or landmark.",
+              ko: "일치하는 위치가 없습니다. 다른 도시, 구역, 랜드마크를 시도해 보세요.",
+            }),
+          );
+        }
+      } catch {
+        setLocationResults([]);
+        setLocationError(
+          pick(locale, {
+            mn: "OpenStreetMap-оос байршил хайхад алдаа гарлаа. Дахин оролдоно уу.",
+            en: "Unable to search OpenStreetMap locations. Please try again.",
+            ko: "OpenStreetMap 위치를 검색하지 못했습니다. 다시 시도해 주세요.",
+          }),
+        );
+      } finally {
+        setLocationLoading(false);
+      }
+    },
+    [locale],
+  );
+
+  const chooseLocation = useCallback((result: OSMResult) => {
+    const label = formatLocationChoice(result);
+    setForm((prev) => ({ ...prev, location: label }));
+    setLocationQuery(label);
+    setLocationResults([]);
+    setLocationError("");
+    setSelectedLocation(result);
+  }, []);
+
+  const resolveLocationFromPoint = useCallback(
+    async (lat: number, lon: number) => {
+      const pointLabel = `${lat.toFixed(5)}, ${lon.toFixed(5)}`;
+      const fallbackResult: OSMResult = {
+        placeId: Date.now(),
+        displayName: pointLabel,
+        lat: String(lat),
+        lon: String(lon),
+        address: {},
+      };
+
+      setLocationReverseLoading(true);
+      setLocationResults([]);
+      setLocationError("");
+      setLocationQuery(pointLabel);
+      setForm((prev) => ({ ...prev, location: pointLabel }));
+      setSelectedLocation(fallbackResult);
+
+      try {
+        const res = await fetch(`/api/locations/reverse?lat=${encodeURIComponent(String(lat))}&lon=${encodeURIComponent(String(lon))}&locale=${locale}`);
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data?.error || "reverse_failed");
+        }
+
+        if (data?.result) {
+          chooseLocation(data.result as OSMResult);
+        }
+      } catch {
+        setLocationError(
+          pick(locale, {
+            mn: "Сонгосон pin-ий хаяг олдсонгүй. Координат хадгалагдлаа.",
+            en: "Could not resolve the pinned address. Coordinates were saved.",
+            ko: "핀의 주소를 찾지 못했습니다. 좌표가 저장되었습니다.",
+          }),
+        );
+      } finally {
+        setLocationReverseLoading(false);
+      }
+    },
+    [chooseLocation, locale],
+  );
 
   const loadJobs = useCallback(async () => {
     setJobsLoading(true);
@@ -199,6 +352,7 @@ export default function PostJobPage() {
     }
     setSuccess(t.postedSuccess);
     setForm(createEmptyForm());
+    resetLocationPicker();
     await loadJobs();
   };
 
@@ -409,13 +563,178 @@ export default function PostJobPage() {
                 <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-blue-900">
                   {t.location} <span className="text-red-500">*</span>
                 </label>
-                <input
-                  value={form.location}
-                  onChange={(e) => updateField("location", e.target.value)}
-                  required
-                  placeholder={pick(locale, { mn: "Жишээ: Сөүл, БНСУ", en: "Example: Seoul, South Korea", ko: "예: 서울, 대한민국" })}
-                  className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm outline-none transition focus:border-[#22c55e]"
-                />
+                <div className="grid gap-4 lg:grid-cols-[1.05fr_0.95fr]">
+                  <div className="space-y-3">
+                    <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <p className="flex items-center gap-2 text-sm font-semibold text-blue-900">
+                            <MapPin size={15} className="text-[#22c55e]" />
+                            OpenStreetMap
+                          </p>
+                          <p className="mt-1 text-xs leading-relaxed text-blue-900/70">
+                            {pick(locale, {
+                              mn: "Хот, дүүрэг, байгууллага, эсвэл landmark-аа хайгаад job location-оо автоматаар бөглөөрэй.",
+                              en: "Search a city, district, company, or landmark and fill the job location automatically, or click the map to drop a pin.",
+                              ko: "도시, 구역, 회사, 랜드마크를 검색해 채용 위치를 자동으로 채우거나 지도를 클릭해 핀을 찍어보세요.",
+                            })}
+                          </p>
+                        </div>
+                        {selectedLocation && (
+                          <button
+                            type="button"
+                            onClick={clearLocationSelection}
+                            className="rounded-full border border-gray-200 px-3 py-1 text-xs font-semibold text-blue-900 transition hover:bg-gray-50"
+                          >
+                            {pick(locale, { mn: "Pin цэвэрлэх", en: "Clear pin", ko: "핀 지우기" })}
+                          </button>
+                        )}
+                      </div>
+
+                      <div className="mt-4 flex gap-2">
+                        <div className="flex flex-1 items-center gap-2 rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5">
+                          <Search size={14} className="shrink-0 text-blue-900/50" />
+                          <input
+                            value={locationQuery}
+                            onChange={(e) => {
+                              setLocationQuery(e.target.value);
+                              setLocationResults([]);
+                              setLocationError("");
+                              if (selectedLocation) clearLocationSelection();
+                            }}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") {
+                                e.preventDefault();
+                                void searchLocations(locationQuery);
+                              }
+                            }}
+                            placeholder={pick(locale, {
+                              mn: "Сөүл, Пусан, Gangnam, Itaewon...",
+                              en: "Seoul, Busan, Gangnam, Itaewon...",
+                              ko: "서울, 부산, 강남, 이태원...",
+                            })}
+                            className="w-full bg-transparent text-sm outline-none placeholder:text-blue-900/35"
+                          />
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => void searchLocations(locationQuery)}
+                          disabled={locationLoading}
+                          className="inline-flex shrink-0 items-center justify-center rounded-xl bg-[#22c55e] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#16a34a] disabled:cursor-not-allowed disabled:opacity-70"
+                        >
+                          {locationLoading ? <Loader2 size={14} className="animate-spin" /> : pick(locale, { mn: "Хайх", en: "Search", ko: "검색" })}
+                        </button>
+                      </div>
+
+                      {locationLoading && (
+                        <p className="mt-3 text-xs text-blue-900/60">
+                          {pick(locale, { mn: "OpenStreetMap-оос байршлууд хайж байна...", en: "Searching OpenStreetMap locations...", ko: "OpenStreetMap 위치를 검색하는 중..." })}
+                        </p>
+                      )}
+
+                      {locationReverseLoading && (
+                        <p className="mt-3 text-xs text-blue-900/60">
+                          {pick(locale, { mn: "Pin-ий хаягийг тодорхойлж байна...", en: "Resolving the pinned address...", ko: "핀의 주소를 확인하는 중..." })}
+                        </p>
+                      )}
+
+                      {locationError && (
+                        <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs leading-relaxed text-amber-800">
+                          {locationError}
+                        </div>
+                      )}
+
+                      {!locationLoading && locationResults.length > 0 && (
+                        <div className="mt-3 max-h-56 space-y-1 overflow-auto rounded-2xl border border-gray-200 bg-white p-1">
+                          {locationResults.map((result) => (
+                            <button
+                              key={result.placeId}
+                              type="button"
+                              onClick={() => chooseLocation(result)}
+                              className="flex w-full items-start gap-3 rounded-xl px-3 py-2.5 text-left transition hover:bg-[#eef7f1]"
+                            >
+                              <div className="mt-0.5 rounded-full bg-[#dcfce7] p-2 text-[#22c55e]">
+                                <MapPin size={13} />
+                              </div>
+                              <div className="min-w-0 flex-1">
+                                <p className="truncate text-sm font-semibold text-blue-900">
+                                  {formatLocationChoice(result)}
+                                </p>
+                                <p className="mt-0.5 line-clamp-2 text-xs leading-relaxed text-blue-900/65">
+                                  {result.displayName}
+                                </p>
+                              </div>
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    <input
+                      value={form.location}
+                      onChange={(e) => {
+                        updateField("location", e.target.value);
+                        if (selectedLocation) clearLocationSelection();
+                      }}
+                      required
+                      placeholder={pick(locale, { mn: "Жишээ: Сөүл, БНСУ", en: "Example: Seoul, South Korea", ko: "예: 서울, 대한민국" })}
+                      className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm outline-none transition focus:border-[#22c55e]"
+                    />
+
+                    <p className="text-xs leading-relaxed text-blue-900/60">
+                      {pick(locale, {
+                        mn: "Сонгосон байршлыг дээрх хайлтаар автоматаар бөглөж болно, эсвэл доор гараар засаж болно.",
+                        en: "You can auto-fill from the search above, or edit the location manually below.",
+                        ko: "위 검색에서 자동으로 채우거나 아래에서 직접 수정할 수 있습니다.",
+                      })}
+                    </p>
+                  </div>
+
+                  <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
+                    <div className="relative min-h-[320px]">
+                      <OpenStreetMapPicker
+                        center={selectedLocation ? { lat: Number(selectedLocation.lat), lon: Number(selectedLocation.lon) } : SEOUL_CENTER}
+                        pin={selectedLocation ? { lat: Number(selectedLocation.lat), lon: Number(selectedLocation.lon) } : null}
+                        onPick={({ lat, lon }) => {
+                          void resolveLocationFromPoint(lat, lon);
+                        }}
+                        className="absolute inset-0 h-full w-full"
+                      />
+                      <div className="absolute inset-x-3 bottom-3 rounded-2xl bg-white/95 p-3 shadow-lg backdrop-blur">
+                        {selectedLocation ? (
+                          <div className="space-y-1">
+                            <p className="text-sm font-semibold text-blue-900">
+                              {formatLocationChoice(selectedLocation)}
+                            </p>
+                            <p className="line-clamp-2 text-xs leading-relaxed text-blue-900/65">
+                              {selectedLocation.displayName}
+                            </p>
+                            <p className="text-[11px] text-blue-900/45">
+                              {selectedLocation.lat}, {selectedLocation.lon}
+                            </p>
+                          </div>
+                        ) : (
+                          <div className="space-y-1">
+                            <p className="text-sm font-semibold text-blue-900">
+                              {pick(locale, {
+                                mn: "OpenStreetMap дээр байршлаа сонгоно уу",
+                                en: "Choose a location on OpenStreetMap",
+                                ko: "OpenStreetMap에서 위치를 선택하세요",
+                              })}
+                            </p>
+                            <p className="text-xs leading-relaxed text-blue-900/65">
+                              {pick(locale, {
+                                mn: "Хайлт ашиглаад pin тавиарай, эсвэл шууд map дээр дарж pin тавьж болно.",
+                                en: "Search to drop a pin, or click directly on the map to place one.",
+                                ko: "검색해서 핀을 찍거나, 지도를 직접 클릭해 핀을 놓을 수 있습니다.",
+                              })}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
 
               <div>

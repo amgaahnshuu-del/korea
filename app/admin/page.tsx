@@ -107,18 +107,7 @@ export default function AdminPage() {
   const [previewJob, setPreviewJob] = useState<AllJob | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [userSearch, setUserSearch] = useState("");
-
-  useEffect(() => {
-    fetch("/api/auth/me")
-      .then((r) => r.json())
-      .then(({ user }) => {
-        if (!user || user.role !== "ADMIN") {
-          router.push("/login");
-          return;
-        }
-        loadStats();
-      });
-  }, [router]);
+  const [jobSearch, setJobSearch] = useState("");
 
   const loadStats = useCallback(() => {
     fetch("/api/admin/stats")
@@ -152,6 +141,18 @@ export default function AdminPage() {
       .then((r) => r.json())
       .then((d) => setUserReports(d.reports || []));
   }, []);
+
+  useEffect(() => {
+    fetch("/api/auth/me")
+      .then((r) => r.json())
+      .then(({ user }) => {
+        if (!user || user.role !== "ADMIN") {
+          router.push("/login");
+          return;
+        }
+        loadStats();
+      });
+  }, [router, loadStats]);
 
   const blockUser = async (userId: string, block: boolean) => {
     setBlockingUserId(userId);
@@ -229,6 +230,25 @@ export default function AdminPage() {
     loadAllJobs();
     setApproving(null);
   };
+
+  const filteredUsers = users.filter((u) => {
+    const query = userSearch.trim().toLowerCase();
+    if (!query) return true;
+    return [u.name, u.email, u.role].some((value) => value.toLowerCase().includes(query));
+  });
+
+  const filteredJobs = allJobs.filter((job) => {
+    const query = jobSearch.trim().toLowerCase();
+    if (!query) return true;
+    return [
+      job.title,
+      job.company.name,
+      job.location,
+      job.category,
+      job.type,
+      job.status,
+    ].some((value) => value.toLowerCase().includes(query));
+  });
 
   if (loading) {
     return (
@@ -503,7 +523,7 @@ export default function AdminPage() {
                     className="rounded-lg border border-gray-200 px-3 py-1.5 text-xs text-blue-900 outline-none focus:border-[#22c55e] focus:ring-1 focus:ring-[#22c55e] w-56"
                   />
                   <span className="text-xs text-blue-900 whitespace-nowrap">
-                    {users.filter(u => u.email.toLowerCase().includes(userSearch.toLowerCase())).length} {pick(locale, { mn: "хэрэглэгч", en: "users", ko: "명" })}
+                    {filteredUsers.length} {pick(locale, { mn: "хэрэглэгч", en: "users", ko: "명" })}
                   </span>
                 </div>
               </div>
@@ -520,7 +540,7 @@ export default function AdminPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {users.filter(u => u.email.toLowerCase().includes(userSearch.toLowerCase())).map((u) => (
+                    {filteredUsers.map((u) => (
                       <tr key={u.id} className={`border-b border-gray-50 hover:bg-gray-50 ${u.isBlocked ? "bg-red-50/40" : ""}`}>
                         <td className="py-3">
                           <p className="font-medium text-blue-900">{u.name}</p>
@@ -552,7 +572,7 @@ export default function AdminPage() {
                         </td>
                       </tr>
                     ))}
-                    {users.filter(u => u.email.toLowerCase().includes(userSearch.toLowerCase())).length === 0 && (
+                    {filteredUsers.length === 0 && (
                       <tr>
                         <td colSpan={6} className="py-12 text-center text-blue-900">{t.noUsers}</td>
                       </tr>
@@ -566,9 +586,24 @@ export default function AdminPage() {
           {/* ── Jobs ── */}
           {tab === "jobs" && (
             <div className="rounded-2xl border border-gray-200 bg-white p-5">
-              <div className="mb-4 flex items-center justify-between">
+              <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <h2 className="font-bold text-blue-900">{t.allJobs}</h2>
-                <span className="text-xs text-blue-900">{allJobs.length} {t.jobs}</span>
+                <div className="flex items-center gap-3">
+                  <input
+                    type="text"
+                    value={jobSearch}
+                    onChange={(e) => setJobSearch(e.target.value)}
+                    placeholder={pick(locale, {
+                      mn: "Гарчиг, компани, байрлалаар хайх...",
+                      en: "Search by title, company, location...",
+                      ko: "제목, 회사, 위치로 검색...",
+                    })}
+                    className="w-64 rounded-lg border border-gray-200 px-3 py-1.5 text-xs text-blue-900 outline-none focus:border-[#22c55e] focus:ring-1 focus:ring-[#22c55e]"
+                  />
+                  <span className="text-xs text-blue-900 whitespace-nowrap">
+                    {filteredJobs.length} {t.jobs}
+                  </span>
+                </div>
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[600px] text-sm">
@@ -583,7 +618,7 @@ export default function AdminPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {allJobs.map((job) => (
+                    {filteredJobs.map((job) => (
                       <tr key={job.id} className="border-b border-gray-50 hover:bg-gray-50">
                         <td className="max-w-45 py-3">
                           <button onClick={() => setPreviewJob(job)} className="truncate text-left text-sm font-medium text-blue-900 hover:text-[#22c55e] hover:underline w-full">
@@ -651,7 +686,7 @@ export default function AdminPage() {
                         </td>
                       </tr>
                     ))}
-                    {allJobs.length === 0 && (
+                    {filteredJobs.length === 0 && (
                       <tr>
                         <td colSpan={6} className="py-12 text-center text-blue-900">{t.noJobs}</td>
                       </tr>

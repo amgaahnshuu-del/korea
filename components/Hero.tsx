@@ -2,9 +2,10 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { MapPin, Search, Volume2 } from "lucide-react";
 import { motion } from "framer-motion";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { pick } from "@/lib/i18n";
 import { useLanguage } from "@/components/LanguageProvider";
 
@@ -19,7 +20,10 @@ const CATEGORIES = [
 
 export default function Hero() {
   const { locale } = useLanguage();
+  const router = useRouter();
   const [activeIndex, setActiveIndex] = useState(0);
+  const [keyword, setKeyword] = useState("");
+  const [location, setLocation] = useState("");
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -27,6 +31,20 @@ export default function Hero() {
     }, 5000);
     return () => clearInterval(timer);
   }, []);
+
+  const handleSearchSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    const params = new URLSearchParams();
+    const q = keyword.trim();
+    const loc = location.trim();
+
+    if (q) params.set("q", q);
+    if (loc) params.set("location", loc);
+
+    const queryString = params.toString();
+    router.push(queryString ? `/jobs?${queryString}` : "/jobs");
+  };
 
   return (
     <section className="relative flex min-h-120 items-center overflow-hidden bg-[#0f2e3d] sm:min-h-175">
@@ -111,16 +129,17 @@ export default function Hero() {
               initial={{ opacity: 0, y: 22 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.55, delay: 0.3 }}
-              action="/jobs"
-              method="get"
+              onSubmit={handleSearchSubmit}
               className="mb-6 w-full overflow-hidden rounded-2xl bg-white shadow-2xl shadow-black/30 sm:mb-8 sm:flex sm:h-13"
+              role="search"
             >
               {/* Job keyword */}
               <label className="flex cursor-text items-center gap-3 border-b border-gray-100 px-5 py-3 sm:flex-1 sm:border-b-0 sm:py-0">
                 <Search className="h-5 w-5 shrink-0 text-gray-400" />
                 <input
                   type="text"
-                  name="q"
+                  value={keyword}
+                  onChange={(e) => setKeyword(e.target.value)}
                   placeholder={pick(locale, {
                     mn: "Ажлын нэр, түлхүүр үг эсвэл...",
                     en: "Job title, keyword...",
@@ -139,7 +158,8 @@ export default function Hero() {
                   <MapPin className="h-5 w-5 shrink-0 text-gray-400" />
                   <input
                     type="text"
-                    name="location"
+                    value={location}
+                    onChange={(e) => setLocation(e.target.value)}
                     placeholder={pick(locale, {
                       mn: "Сөүл, Пусан, Инчон..",
                       en: "Seoul, Busan, Incheon..",

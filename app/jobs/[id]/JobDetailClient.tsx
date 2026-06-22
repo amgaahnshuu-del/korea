@@ -5,13 +5,14 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   MapPin, Briefcase, Building2, Eye, Users, Check,
-  CheckCircle2, BadgeCheck, Phone, Bookmark, AlertTriangle, X,
+  CheckCircle2, BadgeCheck, Phone, Bookmark, AlertTriangle, Navigation2, X,
   MessageCircle, Clock,
 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { formatRelativeTime, formatSalary, getCategoryLabel, getJobTypeLabel, getTranslation, pick } from "@/lib/i18n";
 import { useLanguage } from "@/components/LanguageProvider";
+import JobRouteModal from "@/components/JobRouteModal";
 
 const JOB_TYPE_COLORS: Record<string, string> = {
   FULL_TIME: "bg-green-100 text-green-700",
@@ -43,6 +44,7 @@ export default function JobDetailClient() {
   const t = getTranslation(locale, "jobs");
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
+  const loginHref = `/login?next=${encodeURIComponent(`/jobs/${id}`)}`;
 
   const [job, setJob] = useState<Job | null>(null);
   const [loading, setLoading] = useState(true);
@@ -62,6 +64,20 @@ export default function JobDetailClient() {
   const [reportDesc, setReportDesc] = useState("");
   const [reporting, setReporting] = useState(false);
   const [reportDone, setReportDone] = useState(false);
+  const [showRouteMap, setShowRouteMap] = useState(false);
+
+  const requireAuth = async () => {
+    try {
+      const res = await fetch("/api/auth/me");
+      const data = await res.json();
+      if (data.user) return true;
+    } catch {
+      // Fall through to the login redirect below.
+    }
+
+    router.push(loginHref);
+    return false;
+  };
 
   useEffect(() => {
     fetch(`/api/jobs/${id}`)
@@ -82,9 +98,18 @@ export default function JobDetailClient() {
   }, [id]);
 
   const openModal = async () => {
+    const authenticated = await requireAuth();
+    if (!authenticated) return;
+
     setShowModal(true);
     setCvLoading(true);
     const res = await fetch("/api/auth/cv");
+    if (res.status === 401) {
+      setCvLoading(false);
+      setShowModal(false);
+      router.push(loginHref);
+      return;
+    }
     const data = await res.json();
     if (data.cv) {
       const cv = data.cv;
@@ -113,13 +138,16 @@ export default function JobDetailClient() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ message: cvText }),
     });
-    if (res.status === 401) { router.push("/login"); return; }
+    if (res.status === 401) { router.push(loginHref); setApplying(false); return; }
     if (res.ok) { setApplied(true); setShowModal(false); }
     if (res.status === 409) { setApplied(true); setShowModal(false); }
     setApplying(false);
   };
 
   const toggleSave = async () => {
+    const authenticated = await requireAuth();
+    if (!authenticated) return;
+
     setSaveLoading(true);
     if (saved) {
       await fetch(`/api/favorites/${id}`, { method: "DELETE" });
@@ -130,7 +158,7 @@ export default function JobDetailClient() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ jobId: id }),
       });
-      if (res.status === 401) { router.push("/login"); setSaveLoading(false); return; }
+      if (res.status === 401) { router.push(loginHref); setSaveLoading(false); return; }
       setSaved(true);
     }
     setSaveLoading(false);
@@ -244,7 +272,18 @@ export default function JobDetailClient() {
 
             {/* Stats */}
             <div className="mt-4 space-y-3 border-t border-gray-100 pt-4 text-sm text-blue-900">
-              <div className="flex items-center gap-2"><MapPin size={14} className="shrink-0 text-blue-900" /><span>{job.location}</span></div>
+              <button
+                type="button"
+                onClick={() => setShowRouteMap(true)}
+                className="flex w-full items-center gap-2 rounded-xl border border-gray-200 bg-white px-3 py-2 text-left transition hover:border-[#22c55e]/30 hover:bg-[#eef7f1]"
+              >
+                <MapPin size={14} className="shrink-0 text-blue-900" />
+                <span className="min-w-0 flex-1 truncate">{job.location}</span>
+                <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-[#dcfce7] px-2 py-0.5 text-[11px] font-semibold text-[#22c55e]">
+                  <Navigation2 size={11} />
+                  {pick(locale, { mn: "Зам харах", en: "View route", ko: "경로 보기" })}
+                </span>
+              </button>
               <div className="flex items-center gap-2"><Briefcase size={14} className="shrink-0 text-blue-900" /><span>{getJobTypeLabel(locale, job.type)}</span></div>
               <div className="flex items-center gap-2"><Building2 size={14} className="shrink-0 text-blue-900" /><span>{getCategoryLabel(locale, job.category)}</span></div>
               <div className="flex items-center gap-2"><Eye size={14} className="shrink-0 text-blue-900" /><span>{job.views} {labels.views} · {job._count.applications} {labels.applicants}</span></div>
@@ -285,7 +324,13 @@ export default function JobDetailClient() {
             <h3 className="mb-3 font-semibold text-blue-900">{t.aboutEmployer}</h3>
             <div className="mb-3 flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#dcfce7] font-bold text-[#22c55e]">{job.company.name.charAt(0)}</div>
-              <div><p className="text-sm font-semibold">{job.company.name}</p><p className="text-xs text-blue-900">{job.company.industry || getCategoryLabel(locale, job.category)}</p></div>
+              <div>
+                <p className="text-sm font-semibold">{job.company.name}</p>
+                <p className="flex items-center gap-1 text-xs text-blue-900">
+                  <MapPin size={11} className="shrink-0 text-blue-900" />
+                  <span>{job.location}</span>
+                </p>
+              </div>
             </div>
             {job.company.description && <p className="line-clamp-3 text-xs text-blue-900">{job.company.description}</p>}
             {job.company.size && <p className="mt-2 flex items-center gap-1 text-xs text-blue-900"><Users size={12} /> {job.company.size} {labels.employees}</p>}
@@ -316,6 +361,13 @@ export default function JobDetailClient() {
           </div>
         </div>
       )}
+
+      <JobRouteModal
+        open={showRouteMap}
+        onClose={() => setShowRouteMap(false)}
+        destinationLabel={job.location}
+        jobTitle={job.title}
+      />
 
       {/* Report Modal */}
       {showReport && (

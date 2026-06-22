@@ -48,6 +48,22 @@ export default function LoginPage() {
     return "";
   }, [searchParams, locale]);
 
+  const nextPath = useMemo(() => {
+    const next = searchParams.get("next");
+    if (!next) return "";
+    if (!next.startsWith("/") || next.startsWith("//")) return "";
+    if (next.startsWith("/api/") || next.startsWith("/_next/")) return "";
+    if (next === "/login") return "";
+    return next;
+  }, [searchParams]);
+
+  const googleAuthHref = nextPath
+    ? `/api/auth/google?next=${encodeURIComponent(nextPath)}`
+    : "/api/auth/google";
+  const facebookAuthHref = nextPath
+    ? `/api/auth/facebook?next=${encodeURIComponent(nextPath)}`
+    : "/api/auth/facebook";
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
@@ -74,7 +90,8 @@ export default function LoginPage() {
       return;
     }
     const role = data.user?.role;
-    router.replace(role === "ADMIN" ? "/admin" : "/jobs");
+    const destination = nextPath || (role === "ADMIN" ? "/admin" : "/jobs");
+    router.replace(destination);
     router.refresh();
   };
 
@@ -315,7 +332,7 @@ export default function LoginPage() {
 
               <div className="grid grid-cols-2 gap-3">
                 <a
-                  href="/api/auth/google"
+                  href={googleAuthHref}
                   className="flex items-center justify-center gap-2 rounded-xl border border-[#1D3B5A] bg-[rgba(7,30,56,0.8)] py-2.5 text-sm font-medium text-white transition hover:border-[#00D26A]/50 hover:bg-[rgba(7,30,56,0.95)]"
                 >
                   <svg className="h-4 w-4" viewBox="0 0 24 24">
@@ -339,7 +356,7 @@ export default function LoginPage() {
                   {t.google}
                 </a>
                 <a
-                  href="/api/auth/facebook"
+                  href={facebookAuthHref}
                   className="flex items-center justify-center gap-2 rounded-xl border border-[#1D3B5A] bg-[rgba(7,30,56,0.8)] py-2.5 text-sm font-medium text-white transition hover:border-[#00D26A]/50 hover:bg-[rgba(7,30,56,0.95)]"
                 >
                   <svg className="h-4 w-4" viewBox="0 0 24 24" fill="#1877F2">
