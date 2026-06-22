@@ -1,0 +1,13 @@
+{
+  "name": "korea",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "cd \"ajil korea\" && npm install && npm run build",
+    "dev": "cd \"ajil korea\" && npm run dev",
+    "start": "cd \"ajil korea\" && npm start"
+  },
+  "dependencies": {
+    "next": "14.0.4"
+  }
+}
