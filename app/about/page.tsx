@@ -5,44 +5,6 @@ import { Plane, User } from "lucide-react";
 import { getTranslation, pick, type Locale } from "@/lib/i18n";
 import { getLocale } from "@/lib/i18n-server";
 
-type TimelineItem = {
-  year: string;
-  title: string;
-  desc: string;
-};
-
-function getTimeline(locale: Locale): TimelineItem[] {
-  return [
-    {
-      year: "2015",
-      title: pick(locale, { mn: "Эхлэл", en: "The Beginning", ko: "시작" }),
-      desc: pick(locale, {
-        mn: "Манай үүсгэн байгуулагч Солонгост ажил хайхдаа найдвартай мэдээлэл, хандах газар олдоогүй тул өөрөө тэр цоорхойг нөхөхөөр шийдсэн.",
-        en: "Our founder struggled to find reliable information while job-hunting in Korea, so he decided to build what was missing.",
-        ko: "창업자는 한국에서 일자리를 찾으며 신뢰할 수 있는 정보가 없다는 것을 깨닫고 직접 해결하기로 했습니다.",
-      }),
-    },
-    {
-      year: "2018",
-      title: pick(locale, { mn: "Сөүлд суурь тавьсан", en: "Established in Seoul", ko: "서울에 자리잡다" }),
-      desc: pick(locale, {
-        mn: "Солонгосын ажил олгогчидтой шууд харилцаа тогтоохын тулд Сөүлд суурь тавьсан. Ажилд авалтын процессийг илүү шуурхай, ойлгомжтой болгосон.",
-        en: "Set up a base in Seoul to build direct relationships with Korean employers and make the hiring process clearer for both sides.",
-        ko: "한국 고용주와 직접 협력하기 위해 서울에 거점을 마련하고 채용 과정을 더 명확하게 만들었습니다.",
-      }),
-    },
-    {
-      year: "2024",
-      title: pick(locale, { mn: "Өнөөдөр", en: "Today", ko: "오늘날" }),
-      desc: pick(locale, {
-        mn: "Олон Монгол иргэн манай платформоор дамжуулан Солонгост хууль ёсоор ажилд орсон. Бид өсөн нэмэгдэж буй ч гол зарчмаа алдаагүй: энгийн, шударга, найдвартай байх.",
-        en: "Many Mongolians have found legal employment in Korea through our platform. We've grown, but our core principle hasn't changed: keep it simple, fair, and honest.",
-        ko: "많은 몽골인들이 저희 플랫폼을 통해 한국에서 합법적으로 취업했습니다. 성장했지만 핵심 원칙은 변하지 않았습니다: 단순하고, 공정하고, 정직하게.",
-      }),
-    },
-  ];
-}
-
 function getTeam(locale: Locale) {
   return [
     { name: "Ariunbold T.", role: pick(locale, { mn: "Гүйцэтгэх захирал, үүсгэн байгуулагч", en: "CEO & Founder", ko: "CEO, 창업자" }), bg: "bg-[#eef7f1]" },
@@ -55,7 +17,7 @@ function getTeam(locale: Locale) {
 export default async function AboutPage() {
   const locale = await getLocale();
   const t = getTranslation(locale, "about");
-  const timeline = getTimeline(locale);
+  const timeline: { year: string; title: string; desc: string }[] = t.timeline ?? [];
   const team = getTeam(locale);
 
   const values = t.values ?? [];
@@ -90,10 +52,8 @@ export default async function AboutPage() {
           </div>
           <div className="hidden flex-col items-center gap-3 md:flex">
             <div className="w-40 rounded-2xl bg-[#22c55e]/20 p-5 text-center">
-              <div className="text-3xl font-bold">5,000+</div>
-              <div className="text-xs text-white/65">
-                {pick(locale, { mn: "Энэ жил ажилд орсон", en: "Placed this year", ko: "올해 취업" })}
-              </div>
+              <div className="text-3xl font-bold">1,000+</div>
+              <div className="text-xs text-white/65">{t.heroStat}</div>
             </div>
           </div>
         </div>
@@ -106,8 +66,8 @@ export default async function AboutPage() {
           <p className="mb-10 text-center text-sm text-[#5b7268]">{t.valuesDescription}</p>
 
           <div className="grid gap-6 md:grid-cols-3">
-            {values.map((value: { title: string; desc: string }) => (
-              <div key={value.title} className="rounded-2xl bg-[#eef7f1] p-6">
+            {values.map((value: { title: string; desc: string }, i: number) => (
+              <div key={i} className="rounded-2xl bg-[#eef7f1] p-6">
                 <h3 className="mb-2 font-bold text-[#0f2e2a]">{value.title}</h3>
                 <p className="text-sm leading-relaxed text-[#5b7268]">{value.desc}</p>
               </div>
@@ -134,13 +94,7 @@ export default async function AboutPage() {
       <section className="bg-[#f0faf4] px-4 py-16">
         <div className="mx-auto max-w-3xl">
           <h2 className="mb-2 text-2xl font-bold text-[#0f2e2a]">{t.timelineTitle}</h2>
-          <p className="mb-10 text-sm text-[#5b7268]">
-            {pick(locale, {
-              mn: "Ajil Korea нь нэг хүний туршлагаас гарч ирсэн.",
-              en: "Ajil Korea grew from one person's experience.",
-              ko: "Ajil Korea는 한 사람의 경험에서 시작되었습니다.",
-            })}
-          </p>
+          <p className="mb-10 text-sm text-[#5b7268]">{t.timelineSubtitle}</p>
           <div className="space-y-8">
             {timeline.map((item, i) => (
               <div key={item.year} className="flex gap-5">
@@ -153,9 +107,7 @@ export default async function AboutPage() {
                   )}
                 </div>
                 <div className="pb-8">
-                  <div className="mb-1 text-xs font-semibold text-[#16a34a]">
-                    {pick(locale, { mn: `${item.year} он`, en: `${item.year}`, ko: `${item.year}년` })}
-                  </div>
+                  <div className="mb-1 text-xs font-semibold text-[#16a34a]">{item.year}</div>
                   <h3 className="mb-1 font-bold text-[#0f2e2a]">{item.title}</h3>
                   <p className="text-sm text-[#5b7268]">{item.desc}</p>
                 </div>
@@ -177,7 +129,7 @@ export default async function AboutPage() {
               href="/register"
               className="shrink-0 text-sm font-semibold text-[#16a34a] transition hover:underline"
             >
-              {pick(locale, { mn: "Бидэнтэй нэгдэх →", en: "Join the Team →", ko: "팀에 합류 →" })}
+              {t.joinTeam}
             </Link>
           </div>
           <div className="grid grid-cols-2 gap-6 sm:grid-cols-4">
@@ -196,9 +148,7 @@ export default async function AboutPage() {
 
       {/* ── CTA ──────────────────────────────────────────────────────── */}
       <section className="bg-[#163c4e] px-4 py-12 text-center text-white">
-        <h2 className="mb-2 text-2xl font-bold">
-          {pick(locale, { mn: "Солонгост ажил хайж байна уу?", en: "Looking for work in Korea?", ko: "한국에서 일자리를 찾고 계신가요?" })}
-        </h2>
+        <h2 className="mb-2 text-2xl font-bold">{t.ctaTitle}</h2>
         <p className="mb-6 text-sm text-white/70">{t.ctaText}</p>
         <div className="flex flex-wrap justify-center gap-4">
           <Link href="/jobs" className="rounded-full bg-[#22c55e] px-6 py-2.5 font-semibold text-white transition-all duration-200 hover:bg-[#16a34a]">
